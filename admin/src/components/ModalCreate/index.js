@@ -22,9 +22,9 @@ import { Flex } from "@strapi/design-system/Flex";
 import Check from "@strapi/icons/Check";
 import { useIntl } from "react-intl";
 import { Formik } from "formik";
-import localeFormSchema from "../../schemas";
+import variationFormSchema from "../../schemas";
 import { getTrad } from "../../utils";
-import useAddLocale from "../../hooks/useAddLocale";
+import useAddVariation from "../../hooks/useAddVariation";
 import BaseForm from "./BaseForm";
 
 import slugify from "@sindresorhus/slugify";
@@ -35,12 +35,12 @@ const initialFormValues = {
 };
 
 const ModalCreate = ({ onClose }) => {
-  const { isAdding, addLocale } = useAddLocale();
+  const { isAdding, addVariation } = useAddVariation();
   const { formatMessage } = useIntl();
   const { refetchPermissions } = useRBACProvider();
 
-  const handleLocaleAdd = async (values) => {
-    await addLocale({
+  const handleVariationAdd = async (values) => {
+    await addVariation({
       name: values.name,
       slug: slugify(values.name),
     });
@@ -49,11 +49,11 @@ const ModalCreate = ({ onClose }) => {
   };
 
   return (
-    <ModalLayout onClose={onClose} labelledBy="add-locale-title">
+    <ModalLayout onClose={onClose} labelledBy="add-variation-title">
       <Formik
         initialValues={initialFormValues}
-        onSubmit={handleLocaleAdd}
-        validationSchema={localeFormSchema}
+        onSubmit={handleVariationAdd}
+        validationSchema={variationFormSchema}
         validateOnChange={false}
       >
         <Form>
@@ -62,18 +62,18 @@ const ModalCreate = ({ onClose }) => {
               fontWeight="bold"
               textColor="neutral800"
               as="h2"
-              id="add-locale-title"
+              id="add-variation-title"
             >
               {formatMessage({
                 id: getTrad("Settings.list.actions.add"),
-                defaultMessage: "Add new locale",
+                defaultMessage: "Add new variation",
               })}
             </Typography>
           </ModalHeader>
           <ModalBody>
             <TabGroup
               label={formatMessage({
-                id: getTrad("Settings.locales.modal.title"),
+                id: getTrad("Settings.variations.modal.title"),
                 defaultMessage: "Configurations",
               })}
               id="tabs"
@@ -82,14 +82,14 @@ const ModalCreate = ({ onClose }) => {
               <Flex justifyContent="space-between">
                 <Typography as="h2" variant="beta">
                   {formatMessage({
-                    id: getTrad("Settings.locales.modal.title"),
+                    id: getTrad("Settings.variations.modal.title"),
                     defaultMessage: "Configurations",
                   })}
                 </Typography>
                 <Tabs>
                   <Tab>
                     {formatMessage({
-                      id: getTrad("Settings.locales.modal.base"),
+                      id: getTrad("Settings.variations.modal.base"),
                       defaultMessage: "Base settings",
                     })}
                   </Tab>

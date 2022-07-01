@@ -1,11 +1,11 @@
 'use strict';
 
-const locales = require('./locales');
+const variations = require('./variations');
 const contentTypes = require('./content-types');
-const isoLocales = require('./iso-locales');
+const isoVariations = require('./iso-variations');
 
 module.exports = {
-  locales,
-  'iso-locales': isoLocales,
+  variations,
+  'iso-variations': isoVariations,
   'content-types': contentTypes,
 };

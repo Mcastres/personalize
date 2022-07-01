@@ -4,10 +4,10 @@ const { isScalarAttribute } = require('@strapi/utils').contentTypes;
 const { pick, prop, map, intersection, isEmpty, orderBy, pipe, every } = require('lodash/fp');
 const { getService } = require('../../utils');
 
-const shouldBeProcessed = processedLocaleSlugs => entry => {
+const shouldBeProcessed = processedVariationSlugs => entry => {
   return (
-    entry.localizations.length > 0 &&
-    intersection(entry.localizations.map(prop('locale')), processedLocaleSlugs).length === 0
+    entry.personalizations.length > 0 &&
+    intersection(entry.personalizations.map(prop('variation')), processedVariationSlugs).length === 0
   );
 };
 
@@ -15,36 +15,36 @@ const getUpdatesInfo = ({ entriesToProcess, attributesToMigrate }) => {
   const updates = [];
   for (const entry of entriesToProcess) {
     const attributesValues = pick(attributesToMigrate, entry);
-    const entriesIdsToUpdate = entry.localizations.map(prop('id'));
+    const entriesIdsToUpdate = entry.personalizations.map(prop('id'));
     updates.push({ entriesIdsToUpdate, attributesValues });
   }
   return updates;
 };
 
-const getSortedLocales = async ({ transacting } = {}) => {
-  const localeService = getService('locales');
+const getSortedVariations = async ({ transacting } = {}) => {
+  const variationService = getService('variations');
 
-  let defaultLocale;
+  let defaultVariation;
   try {
     const storeRes = await strapi
       .query('strapi::core-store')
-      .findOne({ key: 'plugin_i18n_default_locale' }, null, { transacting });
-    defaultLocale = JSON.parse(storeRes.value);
+      .findOne({ key: 'plugin_personalization_default_variation' }, null, { transacting });
+    defaultVariation = JSON.parse(storeRes.value);
   } catch (e) {
-    throw new Error("Could not migrate because the default locale doesn't exist");
+    throw new Error("Could not migrate because the default variation doesn't exist");
   }
 
-  const locales = await localeService.find({}, null, { transacting });
-  if (isEmpty(locales)) {
-    throw new Error('Could not migrate because no locale exist');
+  const variations = await variationService.find({}, null, { transacting });
+  if (isEmpty(variations)) {
+    throw new Error('Could not migrate because no variation exist');
   }
 
-  // Put default locale first
+  // Put default variation first
   return pipe(
-    map(locale => ({ slug: locale.slug, isDefault: locale.slug === defaultLocale })),
+    map(variation => ({ slug: variation.slug, isDefault: variation.slug === defaultVariation })),
     orderBy(['isDefault', 'slug'], ['desc', 'asc']),
     map(prop('slug'))
-  )(locales);
+  )(variations);
 };
 
 const areScalarAttributesOnly = ({ model, attributes }) =>
@@ -53,6 +53,6 @@ const areScalarAttributesOnly = ({ model, attributes }) =>
 module.exports = {
   shouldBeProcessed,
   getUpdatesInfo,
-  getSortedLocales,
+  getSortedVariations,
   areScalarAttributesOnly,
 };

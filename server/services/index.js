@@ -2,9 +2,9 @@
 
 const permissions = require('./permissions');
 const metrics = require('./metrics');
-const localizations = require('./localizations');
-const locales = require('./locales');
-const isoLocales = require('./iso-locales');
+const personalizations = require('./personalizations');
+const variations = require('./variations');
+const isoVariations = require('./iso-variations');
 const entityServiceDecorator = require('./entity-service-decorator');
 const coreApi = require('./core-api');
 const contentTypes = require('./content-types');
@@ -12,9 +12,9 @@ const contentTypes = require('./content-types');
 module.exports = {
   permissions,
   metrics,
-  localizations,
-  locales,
-  'iso-locales': isoLocales,
+  personalizations,
+  variations,
+  'iso-variations': isoVariations,
   'entity-service-decorator': entityServiceDecorator,
   'core-api': coreApi,
   'content-types': contentTypes,

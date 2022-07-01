@@ -1,6 +1,6 @@
 import middleware from '../extendCTBInitialDataMiddleware';
 
-describe('i18n | middlewares | extendCTBInitialDataMiddleware', () => {
+describe('personalization | middlewares | extendCTBInitialDataMiddleware', () => {
   describe('the action type matches "ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT"', () => {
     it('forwards the action when the action type does not match', () => {
       const extendCTBInitialDataMiddleware = middleware();
@@ -26,14 +26,14 @@ describe('i18n | middlewares | extendCTBInitialDataMiddleware', () => {
       expect(next).toBeCalledWith(action);
     });
 
-    it('forwards the action when the action.data.pluginOptions.i18n.localized path exists', () => {
+    it('forwards the action when the action.data.pluginOptions.personalization.personalized path exists', () => {
       const extendCTBInitialDataMiddleware = middleware();
       const next = jest.fn();
       const action = {
         type: 'ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT',
         modalType: undefined,
         actionType: undefined,
-        data: { pluginOptions: { i18n: { localized: false } } },
+        data: { pluginOptions: { personalization: { personalized: false } } },
       };
 
       extendCTBInitialDataMiddleware()(next)(action);
@@ -58,7 +58,7 @@ describe('i18n | middlewares | extendCTBInitialDataMiddleware', () => {
         modalType: 'contentType',
         actionType: 'edit',
         data: {
-          pluginOptions: { i18n: { localized: false } },
+          pluginOptions: { personalization: { personalized: false } },
         },
       });
     });
@@ -84,7 +84,7 @@ describe('i18n | middlewares | extendCTBInitialDataMiddleware', () => {
         modalType: 'contentType',
         actionType: 'edit',
         data: {
-          pluginOptions: { i18n: { localized: false }, somePluginThings: true },
+          pluginOptions: { personalization: { personalized: false }, somePluginThings: true },
         },
       });
     });

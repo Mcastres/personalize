@@ -5,17 +5,17 @@ import pluginPkg from '../../package.json';
 import CheckboxConfirmation from './components/CheckboxConfirmation';
 import CMEditViewInjectedComponents from './components/CMEditViewInjectedComponents';
 import Initializer from './components/Initializer';
-import LocalePicker from './components/LocalePicker';
+import VariationPicker from './components/VariationPicker';
 import middlewares from './middlewares';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import { getTrad } from './utils';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
-import LOCALIZED_FIELDS from './utils/localizedFields';
-import i18nReducers from './hooks/reducers';
+import PERSONALIZED_FIELDS from './utils/personalizedFields';
+import personalizationReducers from './hooks/reducers';
 import DeleteModalAdditionalInfos from './components/CMListViewInjectedComponents/DeleteModalAdditionalInfos';
-import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
-import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSingleTypesLinks';
+import addVariationToCollectionTypesLinksHook from './contentManagerHooks/addVariationToCollectionTypesLinks';
+import addVariationToSingleTypesLinksHook from './contentManagerHooks/addVariationToSingleTypesLinks';
 import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
 import mutateEditViewLayoutHook from './contentManagerHooks/mutateEditViewLayout';
 
@@ -25,7 +25,7 @@ export default {
   register(app) {
     app.addMiddlewares(middlewares);
 
-    app.addReducers(i18nReducers);
+    app.addReducers(personalizationReducers);
 
     app.registerPlugin({
       id: pluginId,
@@ -35,14 +35,14 @@ export default {
     });
   },
   bootstrap(app) {
-    // Hooks that mutate the collection types links in order to add the locale filter
+    // Hooks that mutate the collection types links in order to add the variation filter
     app.registerHook(
       'Admin/CM/pages/App/mutate-collection-types-links',
-      addLocaleToCollectionTypesLinksHook
+      addVariationToCollectionTypesLinksHook
     );
     app.registerHook(
       'Admin/CM/pages/App/mutate-single-types-links',
-      addLocaleToSingleTypesLinksHook
+      addVariationToSingleTypesLinksHook
     );
     // Hook that adds a column into the CM's LV table
     app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
@@ -59,7 +59,7 @@ export default {
 
       Component: async () => {
         const component = await import(
-          /* webpackChunkName: "i18n-settings-page" */ './pages/SettingsPage'
+          /* webpackChunkName: "personalization-settings-page" */ './pages/SettingsPage'
         );
 
         return component;
@@ -68,17 +68,17 @@ export default {
     });
 
     app.injectContentManagerComponent('editView', 'informations', {
-      name: 'i18n-locale-filter-edit-view',
+      name: 'personalization-variation-filter-edit-view',
       Component: CMEditViewInjectedComponents,
     });
 
     app.injectContentManagerComponent('listView', 'actions', {
-      name: 'i18n-locale-filter',
-      Component: LocalePicker,
+      name: 'personalization-variation-filter',
+      Component: VariationPicker,
     });
 
     app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
-      name: 'i18n-delete-bullets-in-modal',
+      name: 'personalization-delete-bullets-in-modal',
       Component: DeleteModalAdditionalInfos,
     });
 
@@ -91,23 +91,23 @@ export default {
 
       ctbFormsAPI.extendContentType({
         validator: () => ({
-          i18n: yup.object().shape({
-            localized: yup.bool(),
+          personalization: yup.object().shape({
+            personalized: yup.bool(),
           }),
         }),
         form: {
           advanced() {
             return [
               {
-                name: 'pluginOptions.i18n.localized',
+                name: 'pluginOptions.personalization.personalized',
                 description: {
-                  id: getTrad('plugin.schema.i18n.localized.description-content-type'),
-                  defaultMessage: 'Allow you to have content in different locales',
+                  id: getTrad('plugin.schema.personalization.personalized.description-content-type'),
+                  defaultMessage: 'Allow you to have content in different variations',
                 },
                 type: 'checkboxConfirmation',
                 intlLabel: {
-                  id: getTrad('plugin.schema.i18n.localized.label-content-type'),
-                  defaultMessage: 'Enable localization for this Content-Type',
+                  id: getTrad('plugin.schema.personalization.personalized.label-content-type'),
+                  defaultMessage: 'Enable personalization for this Content-Type',
                 },
               },
             ];
@@ -115,12 +115,12 @@ export default {
         },
       });
 
-      ctbFormsAPI.extendFields(LOCALIZED_FIELDS, {
+      ctbFormsAPI.extendFields(PERSONALIZED_FIELDS, {
         validator: args => ({
-          i18n: yup.object().shape({
-            localized: yup.bool().test({
-              name: 'ensure-unique-localization',
-              message: getTrad('plugin.schema.i18n.ensure-unique-localization'),
+          personalization: yup.object().shape({
+            personalized: yup.bool().test({
+              name: 'ensure-unique-personalization',
+              message: getTrad('plugin.schema.personalization.ensure-unique-personalization'),
               test(value) {
                 if (value === undefined || value) {
                   return true;
@@ -128,7 +128,7 @@ export default {
 
                 const unique = get(args, ['3', 'modifiedData', 'unique'], null);
 
-                // Unique fields must be localized
+                // Unique fields must be personalized
                 if (unique && !value) {
                   return false;
                 }
@@ -144,13 +144,13 @@ export default {
               return [];
             }
 
-            const hasI18nEnabled = get(
+            const hasPersonalizationEnabled = get(
               contentTypeSchema,
-              ['schema', 'pluginOptions', 'i18n', 'localized'],
+              ['schema', 'pluginOptions', 'personalization', 'personalized'],
               false
             );
 
-            if (!hasI18nEnabled) {
+            if (!hasPersonalizationEnabled) {
               return [];
             }
 
@@ -160,15 +160,15 @@ export default {
 
             return [
               {
-                name: 'pluginOptions.i18n.localized',
+                name: 'pluginOptions.personalization.personalized',
                 description: {
-                  id: getTrad('plugin.schema.i18n.localized.description-field'),
-                  defaultMessage: 'The field can have different values in each locale',
+                  id: getTrad('plugin.schema.personalization.personalized.description-field'),
+                  defaultMessage: 'The field can have different values in each variation',
                 },
                 type: 'checkbox',
                 intlLabel: {
-                  id: getTrad('plugin.schema.i18n.localized.label-field'),
-                  defaultMessage: 'Enable localization for this field',
+                  id: getTrad('plugin.schema.personalization.personalized.label-field'),
+                  defaultMessage: 'Enable personalization for this field',
                 },
               },
             ];
@@ -181,7 +181,7 @@ export default {
     const importedTrads = await Promise.all(
       locales.map(locale => {
         return import(
-          /* webpackChunkName: "i18n-translation-[request]" */ `./translations/${locale}.json`
+          /* webpackChunkName: "personalization-translation-[request]" */ `./translations/${locale}.json`
         )
           .then(({ default: data }) => {
             return {

@@ -15,16 +15,16 @@ const createQueryBuilderMock = () => {
   return jest.fn(() => obj);
 };
 
-describe('i18n - Migration - enable/disable localization on a CT', () => {
+describe('personalization - Migration - enable/disable personalization on a CT', () => {
   beforeAll(() => {
     global.strapi = {
       db: {},
       plugins: {
-        i18n: {
+        personalization: {
           services: {
             'content-types': ctService,
-            locales: {
-              getDefaultLocale: jest.fn(() => 'default-locale'),
+            variations: {
+              getDefaultVariation: jest.fn(() => 'default-variation'),
             },
           },
         },
@@ -32,9 +32,9 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
     };
   });
 
-  describe('enable localization on a CT', () => {
+  describe('enable personalization on a CT', () => {
     describe('Should not migrate', () => {
-      test('non i18n => non i18n', async () => {
+      test('non personalization => non i18n', async () => {
         strapi.db.queryBuilder = createQueryBuilderMock();
 
         const previousDefinition = {};
@@ -48,10 +48,10 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         expect(strapi.db.queryBuilder).not.toHaveBeenCalled();
       });
 
-      test('i18n => non i18n', async () => {
+      test('personalization => non i18n', async () => {
         strapi.db.queryBuilder = createQueryBuilderMock();
 
-        const previousDefinition = { pluginOptions: { i18n: { localized: true } } };
+        const previousDefinition = { pluginOptions: { personalization: { personalized: true } } };
         const definition = {};
 
         await enable({
@@ -62,11 +62,11 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         expect(strapi.db.queryBuilder).not.toHaveBeenCalled();
       });
 
-      test('i18n => i18n', async () => {
+      test('personalization => i18n', async () => {
         strapi.db.queryBuilder = createQueryBuilderMock();
 
-        const previousDefinition = { pluginOptions: { i18n: { localized: true } } };
-        const definition = { pluginOptions: { i18n: { localized: true } } };
+        const previousDefinition = { pluginOptions: { personalization: { personalized: true } } };
+        const definition = { pluginOptions: { personalization: { personalized: true } } };
 
         await enable({
           oldContentTypes: { test: previousDefinition },
@@ -78,26 +78,26 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
     });
 
     describe('Should migrate', () => {
-      test('non i18n => i18n ', async () => {
+      test('non personalization => i18n ', async () => {
         strapi.db.queryBuilder = createQueryBuilderMock();
 
         const previousDefinition = {};
-        const definition = { pluginOptions: { i18n: { localized: true } } };
+        const definition = { pluginOptions: { personalization: { personalized: true } } };
 
         await enable({
           oldContentTypes: { test: previousDefinition },
           contentTypes: { test: definition },
         });
 
-        expect(strapi.plugins.i18n.services.locales.getDefaultLocale).toHaveBeenCalled();
+        expect(strapi.plugins.personalization.services.variations.getDefaultVariation).toHaveBeenCalled();
         expect(strapi.db.queryBuilder).toHaveBeenCalled();
       });
     });
   });
 
-  describe('disable localization on a CT', () => {
+  describe('disable personalization on a CT', () => {
     describe('Should not migrate', () => {
-      test('non i18n => non i18n', async () => {
+      test('non personalization => non i18n', async () => {
         strapi.db.queryBuilder = createQueryBuilderMock();
 
         const previousDefinition = {};
@@ -110,11 +110,11 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         expect(strapi.db.queryBuilder).not.toHaveBeenCalled();
       });
 
-      test('non i18n => i18n', async () => {
+      test('non personalization => i18n', async () => {
         strapi.db.queryBuilder = createQueryBuilderMock();
 
         const previousDefinition = {};
-        const definition = { pluginOptions: { i18n: { localized: true } } };
+        const definition = { pluginOptions: { personalization: { personalized: true } } };
 
         await disable({
           oldContentTypes: { test: previousDefinition },
@@ -123,11 +123,11 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         expect(strapi.db.queryBuilder).not.toHaveBeenCalled();
       });
 
-      test('i18n => i18n', async () => {
+      test('personalization => i18n', async () => {
         strapi.db.queryBuilder = createQueryBuilderMock();
 
-        const previousDefinition = { pluginOptions: { i18n: { localized: true } } };
-        const definition = { pluginOptions: { i18n: { localized: true } } };
+        const previousDefinition = { pluginOptions: { personalization: { personalized: true } } };
+        const definition = { pluginOptions: { personalization: { personalized: true } } };
 
         await disable({
           oldContentTypes: { test: previousDefinition },
@@ -138,9 +138,9 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
     });
 
     describe('Should migrate', () => {
-      test('i18n => non i18n - pg', async () => {
+      test('personalization => non i18n - pg', async () => {
         const previousDefinition = {
-          pluginOptions: { i18n: { localized: true } },
+          pluginOptions: { personalization: { personalized: true } },
         };
         const definition = {};
 
@@ -149,7 +149,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
           contentTypes: { test: definition },
         });
 
-        expect(strapi.plugins.i18n.services.locales.getDefaultLocale).toHaveBeenCalled();
+        expect(strapi.plugins.personalization.services.variations.getDefaultVariation).toHaveBeenCalled();
         expect(strapi.db.queryBuilder).toHaveBeenCalled();
       });
     });

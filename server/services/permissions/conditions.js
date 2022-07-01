@@ -2,11 +2,11 @@
 
 const conditions = [
   {
-    displayName: 'Has Locale Access',
-    name: 'has-locale-access',
-    plugin: 'i18n',
+    displayName: 'Has Variation Access',
+    name: 'has-variation-access',
+    plugin: 'personalization',
     handler(user, options) {
-      const { locales } = options.permission.properties || {};
+      const { variations } = options.permission.properties || {};
       const { superAdminCode } = strapi.admin.services.role.constants;
 
       const isSuperAdmin = user.roles.some(role => role.code === superAdminCode);
@@ -16,15 +16,15 @@ const conditions = [
       }
 
       return {
-        locale: {
-          $in: locales || [],
+        variation: {
+          $in: variations || [],
         },
       };
     },
   },
 ];
 
-const registerI18nConditions = async () => {
+const registerPersonalizationConditions = async () => {
   const { conditionProvider } = strapi.admin.services.permission;
 
   await conditionProvider.registerMany(conditions);
@@ -32,5 +32,5 @@ const registerI18nConditions = async () => {
 
 module.exports = {
   conditions,
-  registerI18nConditions,
+  registerPersonalizationConditions,
 };

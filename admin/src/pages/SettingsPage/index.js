@@ -1,26 +1,26 @@
 import React from 'react';
 import { useRBAC } from '@strapi/helper-plugin';
-import LocaleSettingsPage from './LocaleSettingsPage';
-import i18nPermissions from '../../permissions';
+import VariationSettingsPage from './VariationSettingsPage';
+import personalizationPermissions from '../../permissions';
 
-const ProtectedLocaleSettingsPage = () => {
+const ProtectedVariationSettingsPage = () => {
   const {
     isLoading,
     allowedActions: { canRead, canUpdate, canCreate, canDelete },
-  } = useRBAC(i18nPermissions);
+  } = useRBAC(personalizationPermissions);
 
   if (isLoading) {
     return null;
   }
 
   return (
-    <LocaleSettingsPage
-      canReadLocale={canRead}
-      canCreateLocale={canCreate}
-      canUpdateLocale={canUpdate}
-      canDeleteLocale={canDelete}
+    <VariationSettingsPage
+      canReadVariation={canRead}
+      canCreateVariation={canCreate}
+      canUpdateVariation={canUpdate}
+      canDeleteVariation={canDelete}
     />
   );
 };
 
-export default ProtectedLocaleSettingsPage;
+export default ProtectedVariationSettingsPage;

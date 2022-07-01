@@ -1,13 +1,13 @@
 import { fixtures } from '../../../../../../admin-test-utils/lib';
-import addLocaleToCollectionTypesLinksHook from '../addLocaleToCollectionTypesLinks';
+import addVariationToCollectionTypesLinksHook from '../addVariationToCollectionTypesLinks';
 
-describe('i18n | contentManagerHooks | addLocaleToCollectionTypesLinksHook', () => {
+describe('personalization | contentManagerHooks | addVariationToCollectionTypesLinksHook', () => {
   let store;
 
   beforeEach(() => {
     store = {
       ...fixtures.store.state,
-      i18n_locales: { locales: [] },
+      personalization_variations: { variations: [] },
     };
     store.rbacProvider.allPermissions = [];
 
@@ -28,55 +28,55 @@ describe('i18n | contentManagerHooks | addLocaleToCollectionTypesLinksHook', () 
       models: [],
     };
 
-    const results = addLocaleToCollectionTypesLinksHook(data, store);
+    const results = addVariationToCollectionTypesLinksHook(data, store);
 
     expect(results).toEqual(data);
   });
 
-  it('should not add the search key to a collection type link when i18n is not enabled on the single type', () => {
+  it('should not add the search key to a collection type link when personalization is not enabled on the single type', () => {
     const data = {
       ctLinks: [{ to: 'cm/collectionType/test' }],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: false } } }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: false } } }],
     };
 
-    const results = addLocaleToCollectionTypesLinksHook(data, store);
+    const results = addVariationToCollectionTypesLinksHook(data, store);
 
     expect(results).toEqual(data);
   });
 
-  it('should add a search key with the default locale when the user has the right to read it', () => {
-    store.i18n_locales = { locales: [{ code: 'en', isDefault: true }] };
+  it('should add a search key with the default variation when the user has the right to read it', () => {
+    store.personalization_variations = { variations: [{ code: 'en', isDefault: true }] };
     store.rbacProvider.collectionTypesRelatedPermissions.test[
       'plugin::content-manager.explorer.read'
-    ] = [{ properties: { locales: ['en'] } }];
+    ] = [{ properties: { variations: ['en'] } }];
 
     const data = {
       ctLinks: [{ to: 'cm/collectionType/test', search: null }],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: true } } }],
     };
 
-    const results = addLocaleToCollectionTypesLinksHook(data, store);
+    const results = addVariationToCollectionTypesLinksHook(data, store);
 
     const expected = {
-      ctLinks: [{ to: 'cm/collectionType/test', search: 'plugins[i18n][locale]=en' }],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
+      ctLinks: [{ to: 'cm/collectionType/test', search: 'plugins[personalization][variation]=en' }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: true } } }],
     };
 
     expect(results).toEqual(expected);
   });
 
-  it('should set the isDisplayed key to false when the user does not have the right to read any locale', () => {
-    store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
+  it('should set the isDisplayed key to false when the user does not have the right to read any variation', () => {
+    store.personalization_variations.variations = [{ code: 'en', isDefault: true }];
     store.rbacProvider.collectionTypesRelatedPermissions.test[
       'plugin::content-manager.explorer.read'
-    ] = [{ properties: { locales: [] } }];
+    ] = [{ properties: { variations: [] } }];
 
     const data = {
       ctLinks: [{ to: 'cm/collectionType/test', search: 'page=1&pageSize=10' }],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: true } } }],
     };
 
-    const results = addLocaleToCollectionTypesLinksHook(data, store);
+    const results = addVariationToCollectionTypesLinksHook(data, store);
 
     const expected = {
       ctLinks: [
@@ -86,33 +86,33 @@ describe('i18n | contentManagerHooks | addLocaleToCollectionTypesLinksHook', () 
           search: 'page=1&pageSize=10',
         },
       ],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: true } } }],
     };
 
     expect(results).toEqual(expected);
   });
 
   it('should keep the previous search', () => {
-    store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
+    store.personalization_variations.variations = [{ code: 'en', isDefault: true }];
     store.rbacProvider.collectionTypesRelatedPermissions.test[
       'plugin::content-manager.explorer.read'
-    ] = [{ properties: { locales: ['en'] } }];
+    ] = [{ properties: { variations: ['en'] } }];
 
     const data = {
       ctLinks: [{ to: 'cm/collectionType/test', search: 'plugins[plugin][test]=test' }],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: true } } }],
     };
 
-    const results = addLocaleToCollectionTypesLinksHook(data, store);
+    const results = addVariationToCollectionTypesLinksHook(data, store);
 
     const expected = {
       ctLinks: [
         {
           to: 'cm/collectionType/test',
-          search: 'plugins[plugin][test]=test&plugins[i18n][locale]=en',
+          search: 'plugins[plugin][test]=test&plugins[personalization][variation]=en',
         },
       ],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: true } } }],
     };
 
     expect(results).toEqual(expected);

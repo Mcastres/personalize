@@ -3,19 +3,19 @@ import mutateSchema, {
   disableAttributesLocalisation,
 } from '../mutateCTBContentTypeSchema';
 
-describe('i18n | utils ', () => {
+describe('personalization | utils ', () => {
   describe('mutateCTBContentTypeSchema', () => {
-    it('should forward the data the pluginOptions.i18n.localized key does not exist in the content type', () => {
+    it('should forward the data the pluginOptions.personalization.personalized key does not exist in the content type', () => {
       const data = { pluginOptions: { test: true } };
 
       expect(mutateSchema(data)).toEqual(data);
     });
 
-    it('should remove the pluginOptions.i18n key from the content type schema', () => {
+    it('should remove the pluginOptions.personalization key from the content type schema', () => {
       const ctSchema = {
         pluginOptions: {
           pluginA: { foo: 'bar' },
-          i18n: { localized: false },
+          personalization: { personalized: false },
           pluginB: { foo: 'bar' },
         },
         kind: 'test',
@@ -23,7 +23,7 @@ describe('i18n | utils ', () => {
           one: {
             type: 'string',
             pluginOptions: {
-              i18n: { localized: true },
+              personalization: { personalized: true },
             },
             required: true,
           },
@@ -31,7 +31,7 @@ describe('i18n | utils ', () => {
             type: 'number',
             pluginOptions: {
               pluginA: { test: true },
-              i18n: { localized: true },
+              personalization: { personalized: true },
             },
           },
         },
@@ -61,11 +61,11 @@ describe('i18n | utils ', () => {
       expect(mutateSchema(ctSchema, {})).toEqual(expected);
     });
 
-    it('should return the data if the initial schema already has i18n enabled', () => {
+    it('should return the data if the initial schema already has personalization enabled', () => {
       const ctSchema = {
         pluginOptions: {
           pluginA: { foo: 'bar' },
-          i18n: { localized: true },
+          personalization: { personalized: true },
           pluginB: { foo: 'bar' },
         },
         kind: 'test',
@@ -73,7 +73,7 @@ describe('i18n | utils ', () => {
           one: {
             type: 'string',
             pluginOptions: {
-              i18n: { localized: true },
+              personalization: { personalized: true },
             },
             required: true,
           },
@@ -81,7 +81,7 @@ describe('i18n | utils ', () => {
             type: 'number',
             pluginOptions: {
               pluginA: { test: true },
-              i18n: { localized: true },
+              personalization: { personalized: true },
             },
           },
         },
@@ -92,7 +92,7 @@ describe('i18n | utils ', () => {
           schema: {
             pluginOptions: {
               pluginA: { foo: 'bar' },
-              i18n: { localized: true },
+              personalization: { personalized: true },
               pluginB: { foo: 'bar' },
             },
           },
@@ -100,14 +100,14 @@ describe('i18n | utils ', () => {
       ).toEqual(ctSchema);
     });
 
-    it('should set the pluginOptions.i18n.localized to true an all attributes', () => {
+    it('should set the pluginOptions.personalization.personalized to true an all attributes', () => {
       const nextSchema = {
-        pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
+        pluginOptions: { pluginA: { ok: true }, personalization: { personalized: true } },
         attributes: {
           cover: { type: 'media', pluginOptions: { pluginA: { ok: true } } },
           name: {
             type: 'text',
-            pluginOptions: { pluginA: { ok: true }, i18n: { localized: false } },
+            pluginOptions: { pluginA: { ok: true }, personalization: { personalized: false } },
           },
           price: {
             type: 'text',
@@ -115,19 +115,19 @@ describe('i18n | utils ', () => {
         },
       };
       const expected = {
-        pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
+        pluginOptions: { pluginA: { ok: true }, personalization: { personalized: true } },
         attributes: {
           cover: {
             type: 'media',
-            pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
+            pluginOptions: { pluginA: { ok: true }, personalization: { personalized: true } },
           },
           name: {
             type: 'text',
-            pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
+            pluginOptions: { pluginA: { ok: true }, personalization: { personalized: true } },
           },
           price: {
             type: 'text',
-            pluginOptions: { i18n: { localized: true } },
+            pluginOptions: { personalization: { personalized: true } },
           },
         },
       };
@@ -136,7 +136,7 @@ describe('i18n | utils ', () => {
     });
   });
 
-  describe('i18n addLocalisationToFields', () => {
+  describe('personalization addLocalisationToFields', () => {
     it('should forward the data if the attribute type is not correct', () => {
       const attributes = {
         foo: { type: 'relation' },
@@ -146,25 +146,25 @@ describe('i18n | utils ', () => {
       expect(addLocalisationToFields(attributes)).toEqual(attributes);
     });
 
-    it('should keep the pluginOptions for each attribute and enable the i18n.localized value', () => {
+    it('should keep the pluginOptions for each attribute and enable the personalization.personalized value', () => {
       const attributes = {
         foo: { type: 'text', pluginOptions: { pluginA: { ok: true } }, required: true },
-        bar: { type: 'text', pluginOptions: { i18n: { localized: false } } },
+        bar: { type: 'text', pluginOptions: { personalization: { personalized: false } } },
       };
 
       const expected = {
         foo: {
           type: 'text',
-          pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
+          pluginOptions: { pluginA: { ok: true }, personalization: { personalized: true } },
           required: true,
         },
-        bar: { type: 'text', pluginOptions: { i18n: { localized: true } } },
+        bar: { type: 'text', pluginOptions: { personalization: { personalized: true } } },
       };
 
       expect(addLocalisationToFields(attributes)).toEqual(expected);
     });
 
-    it('should enable the pluginOptions.i18n.localized value for each attribute', () => {
+    it('should enable the pluginOptions.personalization.personalized value for each attribute', () => {
       const attributes = {
         foo: { type: 'text', required: true },
         bar: { type: 'text' },
@@ -173,10 +173,10 @@ describe('i18n | utils ', () => {
       const expected = {
         foo: {
           type: 'text',
-          pluginOptions: { i18n: { localized: true } },
+          pluginOptions: { personalization: { personalized: true } },
           required: true,
         },
-        bar: { type: 'text', pluginOptions: { i18n: { localized: true } } },
+        bar: { type: 'text', pluginOptions: { personalization: { personalized: true } } },
       };
 
       expect(addLocalisationToFields(attributes)).toEqual(expected);
@@ -184,14 +184,14 @@ describe('i18n | utils ', () => {
   });
 
   describe('disableAttributesLocalisation', () => {
-    it('should remove the pluginOptions.i18n for all attributes', () => {
+    it('should remove the pluginOptions.personalization for all attributes', () => {
       const attributes = {
         foo: {
           type: 'text',
-          pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
+          pluginOptions: { pluginA: { ok: true }, personalization: { personalized: true } },
           required: true,
         },
-        bar: { type: 'text', pluginOptions: { i18n: { localized: true } } },
+        bar: { type: 'text', pluginOptions: { personalization: { personalized: true } } },
       };
 
       const expected = {

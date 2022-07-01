@@ -1,11 +1,11 @@
 {
-  "name": "@strapi/plugin-i18n",
+  "name": "@strapi/plugin-personalization",
   "version": "4.2.2",
-  "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API",
+  "description": "This plugin enables to create, to read and to update content in different variations, both from the Admin Panel and from the API",
   "repository": {
     "type": "git",
     "url": "https://github.com/strapi/strapi.git",
-    "directory": "packages/plugins/i18n"
+    "directory": "packages/plugins/personalization"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -33,8 +33,8 @@
   },
   "strapi": {
     "displayName": "Internationalization",
-    "name": "i18n",
-    "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API.",
+    "name": "personalization",
+    "description": "This plugin enables to create, to read and to update content in different variations, both from the Admin Panel and from the API.",
     "required": false,
     "kind": "plugin"
   }

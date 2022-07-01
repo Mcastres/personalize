@@ -1,11 +1,11 @@
 'use strict';
 
-const { getIsoLocales } = require('../iso-locales')();
+const { getIsoVariations } = require('../iso-variations')();
 
-describe('ISO locales', () => {
-  test('getIsoLocales', () => {
-    const locales = getIsoLocales();
+describe('ISO variations', () => {
+  test('getIsoVariations', () => {
+    const variations = getIsoVariations();
 
-    expect(locales).toMatchSnapshot();
+    expect(variations).toMatchSnapshot();
   });
 });

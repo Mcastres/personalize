@@ -1,12 +1,10 @@
 'use strict';
 
-const isoLocales = require('./iso-locales');
-
 /**
- * Returns the default locale based either on env var or english
+ * Returns the default variation based either on env var or english
  * @returns {string}
  */
-const getInitLocale = () => {
+const getInitVariation = () => {
   return {
     slug: 'default',
     name: 'Default',
@@ -14,10 +12,9 @@ const getInitLocale = () => {
   };
 };
 
-const DEFAULT_LOCALE = getInitLocale();
+const DEFAULT_VARIATION = getInitVariation();
 
 module.exports = {
-  isoLocales,
-  DEFAULT_LOCALE,
-  getInitLocale,
+  DEFAULT_VARIATION,
+  getInitVariation,
 };

@@ -10,17 +10,17 @@ const migrateForBookshelf = require('./migrate-for-bookshelf');
  ->
 */
 
-// Migration when i18n is disabled on a field of a content-type that have i18n enabled
+// Migration when personalization is disabled on a field of a content-type that have Personalization enabled
 const after = async ({ model, definition, previousDefinition, ORM }) => {
-  const { isLocalizedContentType, getLocalizedAttributes } = getService('content-types');
+  const { isPersonalizedContentType, getPersonalizedAttributes } = getService('content-types');
 
-  if (!isLocalizedContentType(model) || !isLocalizedContentType(previousDefinition)) {
+  if (!isPersonalizedContentType(model) || !isPersonalizedContentType(previousDefinition)) {
     return;
   }
 
-  const localizedAttributes = getLocalizedAttributes(definition);
-  const prevLocalizedAttributes = getLocalizedAttributes(previousDefinition);
-  const attributesDisabled = difference(prevLocalizedAttributes, localizedAttributes);
+  const personalizedAttributes = getPersonalizedAttributes(definition);
+  const prevPersonalizedAttributes = getPersonalizedAttributes(previousDefinition);
+  const attributesDisabled = difference(prevPersonalizedAttributes, personalizedAttributes);
   const attributesToMigrate = intersection(keys(definition.attributes), attributesDisabled);
 
   if (isEmpty(attributesToMigrate)) {

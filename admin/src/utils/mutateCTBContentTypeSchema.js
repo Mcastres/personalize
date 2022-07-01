@@ -1,18 +1,18 @@
 import { has, get, omit } from 'lodash';
-import LOCALIZED_FIELDS from './localizedFields';
+import PERSONALIZED_FIELDS from './personalizedFields';
 
-const localizedPath = ['pluginOptions', 'i18n', 'localized'];
+const personalizedPath = ['pluginOptions', 'personalization', 'personalized'];
 
-const addLocalisationToFields = attributes =>
+const addPersonalizationToFields = attributes =>
   Object.keys(attributes).reduce((acc, current) => {
     const currentAttribute = attributes[current];
 
-    if (LOCALIZED_FIELDS.includes(currentAttribute.type)) {
-      const i18n = { localized: true };
+    if (PERSONALIZED_FIELDS.includes(currentAttribute.type)) {
+      const personalization = { personalized: true };
 
       const pluginOptions = currentAttribute.pluginOptions
-        ? { ...currentAttribute.pluginOptions, i18n }
-        : { i18n };
+        ? { ...currentAttribute.pluginOptions, personalization }
+        : { personalization };
 
       acc[current] = { ...currentAttribute, pluginOptions };
 
@@ -24,38 +24,38 @@ const addLocalisationToFields = attributes =>
     return acc;
   }, {});
 
-const disableAttributesLocalisation = attributes =>
+const disableAttributesPersonalization = attributes =>
   Object.keys(attributes).reduce((acc, current) => {
-    acc[current] = omit(attributes[current], 'pluginOptions.i18n');
+    acc[current] = omit(attributes[current], 'pluginOptions.personalization');
 
     return acc;
   }, {});
 
 const mutateCTBContentTypeSchema = (nextSchema, prevSchema) => {
   // Don't perform mutations components
-  if (!has(nextSchema, localizedPath)) {
+  if (!has(nextSchema, personalizedPath)) {
     return nextSchema;
   }
 
-  const isNextSchemaLocalized = get(nextSchema, localizedPath, false);
-  const isPrevSchemaLocalized = get(prevSchema, ['schema', ...localizedPath], false);
+  const isNextSchemaPersonalized = get(nextSchema, personalizedPath, false);
+  const isPrevSchemaPersonalized = get(prevSchema, ['schema', ...personalizedPath], false);
 
-  // No need to perform modification on the schema, if the i18n feature was not changed
+  // No need to perform modification on the schema, if the personalization feature was not changed
   // at the ct level
-  if (isNextSchemaLocalized && isPrevSchemaLocalized) {
+  if (isNextSchemaPersonalized && isPrevSchemaPersonalized) {
     return nextSchema;
   }
 
-  if (isNextSchemaLocalized) {
-    const attributes = addLocalisationToFields(nextSchema.attributes);
+  if (isNextSchemaPersonalized) {
+    const attributes = addPersonalizationToFields(nextSchema.attributes);
 
     return { ...nextSchema, attributes };
   }
 
-  // Remove the i18n object from the pluginOptions
-  if (!isNextSchemaLocalized) {
-    const pluginOptions = omit(nextSchema.pluginOptions, 'i18n');
-    const attributes = disableAttributesLocalisation(nextSchema.attributes);
+  // Remove the personalization object from the pluginOptions
+  if (!isNextSchemaPersonalized) {
+    const pluginOptions = omit(nextSchema.pluginOptions, 'personalization');
+    const attributes = disableAttributesPersonalization(nextSchema.attributes);
 
     return { ...nextSchema, pluginOptions, attributes };
   }
@@ -63,4 +63,4 @@ const mutateCTBContentTypeSchema = (nextSchema, prevSchema) => {
   return nextSchema;
 };
 export default mutateCTBContentTypeSchema;
-export { addLocalisationToFields, disableAttributesLocalisation };
+export { addPersonalizationToFields, disableAttributesPersonalization };

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ISO locales getIsoLocales 1`] = `
+exports[`ISO variations getIsoVariations 1`] = `
 Array [
   Object {
     "code": "af",

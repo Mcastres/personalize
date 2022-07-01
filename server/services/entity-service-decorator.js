@@ -4,7 +4,7 @@ const { has, get, omit, isArray } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
-const LOCALE_QUERY_FILTER = 'locale';
+const VARIATION_QUERY_FILTER = 'variation';
 const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
 const BULK_ACTIONS = ['delete'];
 
@@ -17,22 +17,22 @@ const paramsContain = (key, params) => {
 };
 
 /**
- * Adds default locale or replaces locale by locale in query params
+ * Adds default variation or replaces variation by variation in query params
  * @param {object} params - query params
  * @param {object} ctx
  */
 const wrapParams = async (params = {}, ctx = {}) => {
   const { action } = ctx;
 
-  if (has(LOCALE_QUERY_FILTER, params)) {
-    if (params[LOCALE_QUERY_FILTER] === 'all') {
-      return omit(LOCALE_QUERY_FILTER, params);
+  if (has(VARIATION_QUERY_FILTER, params)) {
+    if (params[VARIATION_QUERY_FILTER] === 'all') {
+      return omit(VARIATION_QUERY_FILTER, params);
     }
 
     return {
-      ...omit(LOCALE_QUERY_FILTER, params),
+      ...omit(VARIATION_QUERY_FILTER, params),
       filters: {
-        $and: [{ locale: params[LOCALE_QUERY_FILTER] }].concat(params.filters || []),
+        $and: [{ variation: params[VARIATION_QUERY_FILTER] }].concat(params.filters || []),
       },
     };
   }
@@ -44,41 +44,41 @@ const wrapParams = async (params = {}, ctx = {}) => {
     return params;
   }
 
-  const { getDefaultLocale } = getService('locales');
+  const { getDefaultVariation } = getService('variations');
 
   return {
     ...params,
     filters: {
-      $and: [{ locale: await getDefaultLocale() }].concat(params.filters || []),
+      $and: [{ variation: await getDefaultVariation() }].concat(params.filters || []),
     },
   };
 };
 
 /**
- * Assigns a valid locale or the default one if not define
+ * Assigns a valid variation or the default one if not define
  * @param {object} data
  */
-const assignValidLocale = async data => {
-  const { getValidLocale } = getService('content-types');
+const assignValidVariation = async data => {
+  const { getValidVariation } = getService('content-types');
 
   if (!data) {
     return;
   }
 
   try {
-    data.locale = await getValidLocale(data.locale);
+    data.variation = await getValidVariation(data.variation);
   } catch (e) {
-    throw new ApplicationError("This locale doesn't exist");
+    throw new ApplicationError("This variation doesn't exist");
   }
 };
 
 /**
- * Decorates the entity service with I18N business logic
+ * Decorates the entity service with Personalization business logic
  * @param {object} service - entity service
  */
 const decorator = service => ({
   /**
-   * Wraps query options. In particular will add default locale to query params
+   * Wraps query options. In particular will add default variation to query params
    * @param {object} opts - Query options object (params, data, files, populate)
    * @param {object} ctx - Query context
    * @param {object} ctx.model - Model that is being used
@@ -88,9 +88,9 @@ const decorator = service => ({
 
     const model = strapi.getModel(ctx.uid);
 
-    const { isLocalizedContentType } = getService('content-types');
+    const { isPersonalizedContentType } = getService('content-types');
 
-    if (!isLocalizedContentType(model)) {
+    if (!isPersonalizedContentType(model)) {
       return wrappedParams;
     }
 
@@ -98,32 +98,32 @@ const decorator = service => ({
   },
 
   /**
-   * Creates an entry & make links between it and its related localizations
+   * Creates an entry & make links between it and its related personalizations
    * @param {string} uid - Model uid
    * @param {object} opts - Query options object (params, data, files, populate)
    */
   async create(uid, opts = {}) {
     const model = strapi.getModel(uid);
 
-    const { syncLocalizations, syncNonLocalizedAttributes } = getService('localizations');
-    const { isLocalizedContentType } = getService('content-types');
+    const { syncPersonalizations, syncNonPersonalizedAttributes } = getService('personalizations');
+    const { isPersonalizedContentType } = getService('content-types');
 
-    if (!isLocalizedContentType(model)) {
+    if (!isPersonalizedContentType(model)) {
       return service.create.call(this, uid, opts);
     }
 
     const { data } = opts;
-    await assignValidLocale(data);
+    await assignValidVariation(data);
 
     const entry = await service.create.call(this, uid, opts);
 
-    await syncLocalizations(entry, { model });
-    await syncNonLocalizedAttributes(entry, { model });
+    await syncPersonalizations(entry, { model });
+    await syncNonPersonalizedAttributes(entry, { model });
     return entry;
   },
 
   /**
-   * Updates an entry & update related localizations fields
+   * Updates an entry & update related personalizations fields
    * @param {string} uid
    * @param {string} entityId
    * @param {object} opts - Query options object (params, data, files, populate)
@@ -131,10 +131,10 @@ const decorator = service => ({
   async update(uid, entityId, opts = {}) {
     const model = strapi.getModel(uid);
 
-    const { syncNonLocalizedAttributes } = getService('localizations');
-    const { isLocalizedContentType } = getService('content-types');
+    const { syncNonPersonalizedAttributes } = getService('personalizations');
+    const { isPersonalizedContentType } = getService('content-types');
 
-    if (!isLocalizedContentType(model)) {
+    if (!isPersonalizedContentType(model)) {
       return service.update.call(this, uid, entityId, opts);
     }
 
@@ -142,10 +142,10 @@ const decorator = service => ({
 
     const entry = await service.update.call(this, uid, entityId, {
       ...restOptions,
-      data: omit(['locale', 'localizations'], data),
+      data: omit(['variation', 'personalizations'], data),
     });
 
-    await syncNonLocalizedAttributes(entry, { model });
+    await syncNonPersonalizedAttributes(entry, { model });
     return entry;
   },
 });

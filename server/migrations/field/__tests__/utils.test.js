@@ -2,23 +2,23 @@
 
 const { shouldBeProcessed, getUpdatesInfo } = require('../utils');
 
-describe('i18n - migration utils', () => {
+describe('personalization - migration utils', () => {
   describe('shouldBeProcessed', () => {
     const testData = [
       [[], [], false],
       [['en'], [], false],
       [['en', 'fr'], [], false],
-      [['en', 'fr'], [{ locale: 'en' }], false],
-      [['en', 'fr'], [{ locale: 'fr' }], false],
-      [['en'], [{ locale: 'fr' }, { locale: 'en' }], false],
-      [['en', 'fr'], [{ locale: 'fr' }, { locale: 'en' }], false],
-      [[], [{ locale: 'en' }], true],
-      [['en'], [{ locale: 'fr' }], true],
-      [['en', 'fr'], [{ locale: 'it' }], true],
+      [['en', 'fr'], [{ variation: 'en' }], false],
+      [['en', 'fr'], [{ variation: 'fr' }], false],
+      [['en'], [{ variation: 'fr' }, { locale: 'en' }], false],
+      [['en', 'fr'], [{ variation: 'fr' }, { locale: 'en' }], false],
+      [[], [{ variation: 'en' }], true],
+      [['en'], [{ variation: 'fr' }], true],
+      [['en', 'fr'], [{ variation: 'it' }], true],
     ];
 
-    test.each(testData)('%p %j : %p', (processedLocaleCodes, localizations, expectedResult) => {
-      const result = shouldBeProcessed(processedLocaleCodes)({ localizations });
+    test.each(testData)('%p %j : %p', (processedVariationCodes, personalizations, expectedResult) => {
+      const result = shouldBeProcessed(processedVariationCodes)({ personalizations });
 
       expect(result).toBe(expectedResult);
     });
@@ -27,14 +27,14 @@ describe('i18n - migration utils', () => {
   describe('getUpdatesInfo', () => {
     const testData = [
       [
-        [{ name: 'Name', nickname: 'Nickname', localizations: [{ id: 1 }, { id: 2 }] }],
+        [{ name: 'Name', nickname: 'Nickname', personalizations: [{ id: 1 }, { id: 2 }] }],
         ['name'],
         [{ entriesIdsToUpdate: [1, 2], attributesValues: { name: 'Name' } }],
       ],
       [
         [
-          { name: 'Name 1', nickname: 'Nickname 1', localizations: [{ id: 1 }, { id: 2 }] },
-          { name: 'Name 2', nickname: 'Nickname 2', localizations: [{ id: 3 }, { id: 4 }] },
+          { name: 'Name 1', nickname: 'Nickname 1', personalizations: [{ id: 1 }, { id: 2 }] },
+          { name: 'Name 2', nickname: 'Nickname 2', personalizations: [{ id: 3 }, { id: 4 }] },
         ],
         ['name'],
         [

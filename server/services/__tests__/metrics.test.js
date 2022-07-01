@@ -1,23 +1,23 @@
 'use strict';
 
 const metricsLoader = require('../metrics');
-const { isLocalizedContentType } = require('../content-types')();
+const { isPersonalizedContentType } = require('../content-types')();
 
 describe('Metrics', () => {
   test('sendDidInitializeEvent', async () => {
     global.strapi = {
       contentTypes: {
-        withI18n: {
+        withPersonalization: {
           pluginOptions: {
-            i18n: {
-              localized: true,
+            personalization: {
+              personalized: true,
             },
           },
         },
-        withoutI18n: {
+        withoutPersonalization: {
           pluginOptions: {
-            i18n: {
-              localized: false,
+            personalization: {
+              personalized: false,
             },
           },
         },
@@ -26,10 +26,10 @@ describe('Metrics', () => {
         },
       },
       plugins: {
-        i18n: {
+        personalization: {
           services: {
             ['content-types']: {
-              isLocalizedContentType,
+              isPersonalizedContentType,
             },
           },
         },
@@ -43,25 +43,25 @@ describe('Metrics', () => {
 
     await sendDidInitializeEvent();
 
-    expect(strapi.telemetry.send).toHaveBeenCalledWith('didInitializeI18n', {
+    expect(strapi.telemetry.send).toHaveBeenCalledWith('didInitializePersonalization', {
       numberOfContentTypes: 1,
     });
   });
 
-  test('sendDidUpdateI18nLocalesEvent', async () => {
+  test('sendDidUpdatePersonalizationVariationsEvent', async () => {
     global.strapi = {
       contentTypes: {
-        withI18n: {
+        withPersonalization: {
           pluginOptions: {
-            i18n: {
-              localized: true,
+            personalization: {
+              personalized: true,
             },
           },
         },
-        withoutI18n: {
+        withoutPersonalization: {
           pluginOptions: {
-            i18n: {
-              localized: false,
+            personalization: {
+              personalized: false,
             },
           },
         },
@@ -70,9 +70,9 @@ describe('Metrics', () => {
         },
       },
       plugins: {
-        i18n: {
+        personalization: {
           services: {
-            locales: {
+            variations: {
               count: jest.fn(() => 3),
             },
           },
@@ -83,12 +83,12 @@ describe('Metrics', () => {
       },
     };
 
-    const { sendDidUpdateI18nLocalesEvent } = metricsLoader({ strapi });
+    const { sendDidUpdatePersonalizationVariationsEvent } = metricsLoader({ strapi });
 
-    await sendDidUpdateI18nLocalesEvent();
+    await sendDidUpdatePersonalizationVariationsEvent();
 
-    expect(strapi.telemetry.send).toHaveBeenCalledWith('didUpdateI18nLocales', {
-      numberOfLocales: 3,
+    expect(strapi.telemetry.send).toHaveBeenCalledWith('didUpdatePersonalizationVariations', {
+      numberOfVariations: 3,
     });
   });
 });

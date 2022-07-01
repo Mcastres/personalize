@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ConfirmDialog } from '@strapi/helper-plugin';
-import useDeleteLocale from '../../hooks/useDeleteLocale';
+import useDeleteVariation from '../../hooks/useDeleteVariation';
 
-const ModalDelete = ({ localeToDelete, onClose }) => {
-  const { isDeleting, deleteLocale } = useDeleteLocale();
-  const isOpened = Boolean(localeToDelete);
+const ModalDelete = ({ variationToDelete, onClose }) => {
+  const { isDeleting, deleteVariation } = useDeleteVariation();
+  const isOpened = Boolean(variationToDelete);
 
-  const handleDelete = () => deleteLocale(localeToDelete.id).then(onClose);
+  const handleDelete = () => deleteVariation(variationToDelete.id).then(onClose);
 
   return (
     <ConfirmDialog
@@ -20,11 +20,11 @@ const ModalDelete = ({ localeToDelete, onClose }) => {
 };
 
 ModalDelete.defaultProps = {
-  localeToDelete: undefined,
+  variationToDelete: undefined,
 };
 
 ModalDelete.propTypes = {
-  localeToDelete: PropTypes.shape({
+  variationToDelete: PropTypes.shape({
     id: PropTypes.number.isRequired,
   }),
   onClose: PropTypes.func.isRequired,

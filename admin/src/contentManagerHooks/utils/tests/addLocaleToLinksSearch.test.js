@@ -1,25 +1,25 @@
-import addLocaleToLinksSearch from '../addLocaleToLinksSearch';
+import addVariationToLinksSearch from '../addVariationToLinksSearch';
 
-describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
+describe('personalization | contentManagerHooks | utils | addVariationToLinksSearch', () => {
   it('should return an array', () => {
-    expect(addLocaleToLinksSearch([])).toEqual([]);
+    expect(addVariationToLinksSearch([])).toEqual([]);
   });
 
-  it('should not modify the links when i18n is not enabled on a content type', () => {
+  it('should not modify the links when personalization is not enabled on a content type', () => {
     const links = [{ uid: 'test', to: 'cm/collectionType/test' }];
-    const schemas = [{ uid: 'test', pluginOptions: { i18n: { localized: false } } }];
+    const schemas = [{ uid: 'test', pluginOptions: { personalization: { personalized: false } } }];
 
-    expect(addLocaleToLinksSearch(links, 'collectionType', schemas)).toEqual(links);
+    expect(addVariationToLinksSearch(links, 'collectionType', schemas)).toEqual(links);
   });
 
-  it('should set the isDisplayed key to false when the user does not have the permission to read or create a locale on a collection type', () => {
+  it('should set the isDisplayed key to false when the user does not have the permission to read or create a variation on a collection type', () => {
     const links = [
       { uid: 'foo', to: 'cm/collectionType/foo', isDisplayed: true },
       { uid: 'bar', to: 'cm/collectionType/bar', isDisplayed: true },
     ];
     const schemas = [
-      { uid: 'foo', pluginOptions: { i18n: { localized: true } } },
-      { uid: 'bar', pluginOptions: { i18n: { localized: true } } },
+      { uid: 'foo', pluginOptions: { personalization: { personalized: true } } },
+      { uid: 'bar', pluginOptions: { personalization: { personalized: true } } },
     ];
     const permissions = {
       foo: {
@@ -43,7 +43,7 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
           {
             properties: {
               fields: ['name'],
-              locales: [],
+              variations: [],
             },
           },
         ],
@@ -51,7 +51,7 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
           {
             properties: {
               fields: ['name'],
-              locales: [],
+              variations: [],
             },
           },
         ],
@@ -61,21 +61,21 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
       { uid: 'foo', to: 'cm/collectionType/foo', isDisplayed: false },
       { uid: 'bar', to: 'cm/collectionType/bar', isDisplayed: false },
     ];
-    const locales = [{ code: 'en', isDefault: true }, { code: 'fr' }];
+    const variations = [{ code: 'en', isDefault: true }, { code: 'fr' }];
 
-    expect(addLocaleToLinksSearch(links, 'collectionType', schemas, locales, permissions)).toEqual(
+    expect(addVariationToLinksSearch(links, 'collectionType', schemas, variations, permissions)).toEqual(
       expected
     );
   });
 
-  it('should add the locale to a link search', () => {
+  it('should add the variation to a link search', () => {
     const links = [
       { uid: 'foo', to: 'cm/collectionType/foo', isDisplayed: true, search: 'page=1' },
       { uid: 'bar', to: 'cm/collectionType/bar', isDisplayed: true },
     ];
     const schemas = [
-      { uid: 'foo', pluginOptions: { i18n: { localized: true } } },
-      { uid: 'bar', pluginOptions: { i18n: { localized: true } } },
+      { uid: 'foo', pluginOptions: { personalization: { personalized: true } } },
+      { uid: 'bar', pluginOptions: { personalization: { personalized: true } } },
     ];
     const permissions = {
       foo: {
@@ -83,7 +83,7 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
           {
             properties: {
               fields: ['name'],
-              locales: ['fr'],
+              variations: ['fr'],
             },
           },
         ],
@@ -100,7 +100,7 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
           {
             properties: {
               fields: ['name'],
-              locales: ['fr'],
+              variations: ['fr'],
             },
           },
         ],
@@ -108,7 +108,7 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
           {
             properties: {
               fields: ['name'],
-              locales: ['en'],
+              variations: ['en'],
             },
           },
         ],
@@ -119,18 +119,18 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
         uid: 'foo',
         to: 'cm/collectionType/foo',
         isDisplayed: true,
-        search: 'page=1&plugins[i18n][locale]=fr',
+        search: 'page=1&plugins[personalization][variation]=fr',
       },
       {
         uid: 'bar',
         to: 'cm/collectionType/bar',
         isDisplayed: true,
-        search: 'plugins[i18n][locale]=en',
+        search: 'plugins[personalization][variation]=en',
       },
     ];
-    const locales = [{ code: 'en', isDefault: true }, { code: 'fr' }];
+    const variations = [{ code: 'en', isDefault: true }, { code: 'fr' }];
 
-    expect(addLocaleToLinksSearch(links, 'collectionType', schemas, locales, permissions)).toEqual(
+    expect(addVariationToLinksSearch(links, 'collectionType', schemas, variations, permissions)).toEqual(
       expected
     );
   });

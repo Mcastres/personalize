@@ -3,93 +3,93 @@
 const { prop, propEq, identity, merge } = require('lodash/fp');
 const { ValidationError } = require('@strapi/utils').errors;
 
-const LOCALE_SCALAR_TYPENAME = 'I18NLocaleCode';
-const LOCALE_ARG_PLUGIN_NAME = 'I18NLocaleArg';
+const VARIATION_SCALAR_TYPENAME = 'PersonalizationVariationCode';
+const VARIATION_ARG_PLUGIN_NAME = 'PersonalizationVariationArg';
 
-const getLocalizedTypesFromRegistry = ({ strapi, typeRegistry }) => {
+const getPersonalizedTypesFromRegistry = ({ strapi, typeRegistry }) => {
   const { KINDS } = strapi.plugin('graphql').service('constants');
-  const { isLocalizedContentType } = strapi.plugin('i18n').service('content-types');
+  const { isPersonalizedContentType } = strapi.plugin('personalization').service('content-types');
 
   return typeRegistry.where(
-    ({ config }) => config.kind === KINDS.type && isLocalizedContentType(config.contentType)
+    ({ config }) => config.kind === KINDS.type && isPersonalizedContentType(config.contentType)
   );
 };
 
 module.exports = ({ strapi }) => ({
   register() {
     const { service: getGraphQLService } = strapi.plugin('graphql');
-    const { service: getI18NService } = strapi.plugin('i18n');
+    const { service: getPersonalizationService } = strapi.plugin('personalization');
 
-    const { isLocalizedContentType } = getI18NService('content-types');
+    const { isPersonalizedContentType } = getPersonalizationService('content-types');
 
     const extensionService = getGraphQLService('extension');
 
-    const getCreateLocalizationMutationType = contentType => {
+    const getCreatePersonalizationMutationType = contentType => {
       const { getTypeName } = getGraphQLService('utils').naming;
 
-      return `create${getTypeName(contentType)}Localization`;
+      return `create${getTypeName(contentType)}Personalization`;
     };
 
-    extensionService.shadowCRUD('plugin::i18n.locale').disableMutations();
+    extensionService.shadowCRUD('plugin::personalization.variation').disableMutations();
 
-    // Disable unwanted fields for localized content types
+    // Disable unwanted fields for personalized content types
     Object.entries(strapi.contentTypes).forEach(([uid, ct]) => {
-      if (isLocalizedContentType(ct)) {
-        // Disable locale field in localized inputs
+      if (isPersonalizedContentType(ct)) {
+        // Disable variation field in personalized inputs
         extensionService
           .shadowCRUD(uid)
-          .field('locale')
+          .field('variation')
           .disableInput();
 
-        // Disable localizations field in localized inputs
+        // Disable personalizations field in personalized inputs
         extensionService
           .shadowCRUD(uid)
-          .field('localizations')
+          .field('personalizations')
           .disableInput();
       }
     });
 
     extensionService.use(({ nexus, typeRegistry }) => {
-      const i18nLocaleArgPlugin = getI18nLocaleArgPlugin({ nexus, typeRegistry });
-      const i18nLocaleScalar = getLocaleScalar({ nexus });
+      const personalizationVariationArgPlugin = getPersonalizationVariationArgPlugin({ nexus, typeRegistry });
+      const personalizationVariationScalar = getVariationScalar({ nexus });
       const {
-        mutations: createLocalizationMutations,
-        resolversConfig: createLocalizationResolversConfig,
-      } = getCreateLocalizationMutations({ nexus, typeRegistry });
+        mutations: createPersonalizationMutations,
+        resolversConfig: createPersonalizationResolversConfig,
+      } = getCreatePersonalizationMutations({ nexus, typeRegistry });
 
       return {
-        plugins: [i18nLocaleArgPlugin],
-        types: [i18nLocaleScalar, createLocalizationMutations],
+        plugins: [personalizationVariationArgPlugin],
+        types: [personalizationVariationScalar, createPersonalizationMutations],
 
         resolversConfig: {
-          // Auth for createLocalization mutations
-          ...createLocalizationResolversConfig,
-          // locale arg transformation for localized createEntity mutations
-          ...getLocalizedCreateMutationsResolversConfigs({ typeRegistry }),
+          // Auth for createPersonalization mutations
+          ...createPersonalizationResolversConfig,
+          // variation arg transformation for personalized createEntity mutations
+          ...getPersonalizedCreateMutationsResolversConfigs({ typeRegistry }),
         },
       };
     });
 
-    const getLocaleScalar = ({ nexus }) => {
-      const locales = getI18NService('iso-locales').getIsoLocales();
+    const getVariationScalar = ({ nexus }) => {
+      const variations = getPersonalizationService('iso-variations').getIsoVariations();
 
       return nexus.scalarType({
-        name: LOCALE_SCALAR_TYPENAME,
+        name: VARIATION_SCALAR_TYPENAME,
 
-        description: 'A string used to identify an i18n locale',
+        description: 'A string used to identify an personalization variation',
 
         serialize: identity,
         parseValue: identity,
 
         parseLiteral(ast) {
           if (ast.kind !== 'StringValue') {
-            throw new ValidationError('Locale cannot represent non string type');
+            throw new ValidationError('Variation cannot represent non string type');
           }
 
-          const isValidLocale = ast.value === 'all' || locales.find(propEq('slug', ast.value));
+          const isValidVariation = ast.value === 'all' || variations.find(propEq('slug', ast.value));
 
-          if (!isValidLocale) {
-            throw new ValidationError('Unknown locale supplied');
+          if (!isValidVariation) {
+            throw new ValidationError('Unknown variation supplied');
           }
 
           return ast.value;
@@ -97,33 +97,33 @@ module.exports = ({ strapi }) => ({
       });
     };
 
-    const getCreateLocalizationMutations = ({ nexus, typeRegistry }) => {
-      const localizedContentTypes = getLocalizedTypesFromRegistry({ strapi, typeRegistry }).map(
+    const getCreatePersonalizationMutations = ({ nexus, typeRegistry }) => {
+      const personalizedContentTypes = getPersonalizedTypesFromRegistry({ strapi, typeRegistry }).map(
         prop('config.contentType')
       );
 
-      const createLocalizationComponents = localizedContentTypes.map(ct =>
-        getCreateLocalizationComponents(ct, { nexus })
+      const createPersonalizationComponents = personalizedContentTypes.map(ct =>
+        getCreatePersonalizationComponents(ct, { nexus })
       );
 
       // Extract & merge each resolverConfig into a single object
-      const resolversConfig = createLocalizationComponents
+      const resolversConfig = createPersonalizationComponents
         .map(prop('resolverConfig'))
         .reduce(merge, {});
 
-      const mutations = createLocalizationComponents.map(prop('mutation'));
+      const mutations = createPersonalizationComponents.map(prop('mutation'));
 
       return { mutations, resolversConfig };
     };
 
-    const getCreateLocalizationComponents = (contentType, { nexus }) => {
+    const getCreatePersonalizationComponents = (contentType, { nexus }) => {
       const { getEntityResponseName, getContentTypeInputName } = getGraphQLService('utils').naming;
-      const { createCreateLocalizationHandler } = getI18NService('core-api');
+      const { createCreatePersonalizationHandler } = getPersonalizationService('core-api');
 
       const responseType = getEntityResponseName(contentType);
-      const mutationName = getCreateLocalizationMutationType(contentType);
+      const mutationName = getCreatePersonalizationMutationType(contentType);
 
-      const resolverHandler = createCreateLocalizationHandler(contentType);
+      const resolverHandler = createCreatePersonalizationHandler(contentType);
 
       const mutation = nexus.extendType({
         type: 'Mutation',
@@ -132,18 +132,18 @@ module.exports = ({ strapi }) => ({
           t.field(mutationName, {
             type: responseType,
 
-            // The locale arg will be automatically added through the i18n graphql extension
+            // The variation arg will be automatically added through the personalization graphql extension
             args: {
               id: 'ID',
               data: getContentTypeInputName(contentType),
             },
 
             async resolve(parent, args) {
-              const { id, locale, data } = args;
+              const { id, variation, data } = args;
 
               const ctx = {
                 id,
-                data: { ...data, locale },
+                data: { ...data, variation },
               };
 
               const value = await resolverHandler(ctx);
@@ -157,7 +157,7 @@ module.exports = ({ strapi }) => ({
       const resolverConfig = {
         [`Mutation.${mutationName}`]: {
           auth: {
-            scope: [`${contentType.uid}.createLocalization`],
+            scope: [`${contentType.uid}.createPersonalization`],
           },
         },
       };
@@ -165,23 +165,23 @@ module.exports = ({ strapi }) => ({
       return { mutation, resolverConfig };
     };
 
-    const getLocalizedCreateMutationsResolversConfigs = ({ typeRegistry }) => {
-      const localizedCreateMutationsNames = getLocalizedTypesFromRegistry({
+    const getPersonalizedCreateMutationsResolversConfigs = ({ typeRegistry }) => {
+      const personalizedCreateMutationsNames = getPersonalizedTypesFromRegistry({
         strapi,
         typeRegistry,
       })
         .map(prop('config.contentType'))
         .map(getGraphQLService('utils').naming.getCreateMutationTypeName);
 
-      return localizedCreateMutationsNames.reduce(
+      return personalizedCreateMutationsNames.reduce(
         (acc, mutationName) => ({
           ...acc,
 
           [`Mutation.${mutationName}`]: {
             middlewares: [
-              // Set data's locale using args' locale
+              // Set data's variation using args' variation
               (resolve, parent, args, context, info) => {
-                args.data.locale = args.locale;
+                args.data.variation = args.variation;
 
                 return resolve(parent, args, context, info);
               },
@@ -192,10 +192,10 @@ module.exports = ({ strapi }) => ({
       );
     };
 
-    const getI18nLocaleArgPlugin = ({ nexus, typeRegistry }) => {
-      const { isLocalizedContentType } = getI18NService('content-types');
+    const getPersonalizationVariationArgPlugin = ({ nexus, typeRegistry }) => {
+      const { isPersonalizedContentType } = getPersonalizationService('content-types');
 
-      const addLocaleArg = config => {
+      const addVariationArg = config => {
         const { parentType } = config;
 
         // Only target queries or mutations
@@ -211,20 +211,20 @@ module.exports = ({ strapi }) => ({
 
         const contentType = registryType.config.contentType;
 
-        // Ignore non-localized content types
-        if (!isLocalizedContentType(contentType)) {
+        // Ignore non-personalized content types
+        if (!isPersonalizedContentType(contentType)) {
           return;
         }
 
-        config.args.locale = nexus.arg({ type: LOCALE_SCALAR_TYPENAME });
+        config.args.variation = nexus.arg({ type: VARIATION_SCALAR_TYPENAME });
       };
 
       return nexus.plugin({
-        name: LOCALE_ARG_PLUGIN_NAME,
+        name: VARIATION_ARG_PLUGIN_NAME,
 
         onAddOutputField(config) {
-          // Add the locale arg to the queries on localized CTs
-          addLocaleArg(config);
+          // Add the variation arg to the queries on personalized CTs
+          addVariationArg(config);
         },
       });
     };

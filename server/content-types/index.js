@@ -1,9 +1,7 @@
 'use strict';
 
-const locale = require("./locale");
-const variationType = require("./variation-type");
+const variation = require("./variation");
 
 module.exports = {
-  locale,
-  "variation-type": variationType,
+  variation,
 };

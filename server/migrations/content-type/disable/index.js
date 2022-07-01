@@ -1,12 +1,12 @@
 'use strict';
 
 const { getService } = require('../../../utils');
-const { DEFAULT_LOCALE } = require('../../../constants');
+const { DEFAULT_VARIATION } = require('../../../constants');
 
-// Disable i18n on CT -> Delete all entities that are not in the default locale
+// Disable personalization on CT -> Delete all entities that are not in the default variation
 module.exports = async ({ oldContentTypes, contentTypes }) => {
-  const { isLocalizedContentType } = getService('content-types');
-  const { getDefaultLocale } = getService('locales');
+  const { isPersonalizedContentType } = getService('content-types');
+  const { getDefaultVariation } = getService('variations');
 
   if (!oldContentTypes) {
     return;
@@ -20,14 +20,14 @@ module.exports = async ({ oldContentTypes, contentTypes }) => {
     const oldContentType = oldContentTypes[uid];
     const contentType = contentTypes[uid];
 
-    // if i18N is disabled remove non default locales before sync
-    if (isLocalizedContentType(oldContentType) && !isLocalizedContentType(contentType)) {
-      const defaultLocale = (await getDefaultLocale()) || DEFAULT_LOCALE.slug;
+    // if Personalization is disabled remove non default variations before sync
+    if (isPersonalizedContentType(oldContentType) && !isPersonalizedContentType(contentType)) {
+      const defaultVariation = (await getDefaultVariation()) || DEFAULT_VARIATION.slug;
 
       await strapi.db
         .queryBuilder(uid)
         .delete()
-        .where({ locale: { $ne: defaultLocale } })
+        .where({ variation: { $ne: defaultVariation } })
         .execute();
     }
   }

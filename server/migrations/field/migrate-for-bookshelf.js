@@ -3,7 +3,7 @@
 const { migrate } = require('./migrate');
 const { areScalarAttributesOnly } = require('./utils');
 
-const TMP_TABLE_NAME = '__tmp__i18n_field_migration';
+const TMP_TABLE_NAME = '__tmp__personalization_field_migration';
 
 const batchInsertInTmpTable = async ({ updatesInfo }, { transacting: trx }) => {
   const tmpEntries = [];

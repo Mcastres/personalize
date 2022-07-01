@@ -41,8 +41,8 @@ const SettingsModal = ({ children, title, breadCrumb, tabsAriaLabel, tabsId }) =
             <div style={{ marginTop: '-40px' }}>
               <TabsNav defaultSelection={0} label={tabsAriaLabel} id={tabsId}>
                 <Tabs position="right">
-                  <Tab>{formatMessage({ id: getTrad('Settings.locales.modal.base') })}</Tab>
-                  <Tab>{formatMessage({ id: getTrad('Settings.locales.modal.advanced') })}</Tab>
+                  <Tab>{formatMessage({ id: getTrad('Settings.variations.modal.base') })}</Tab>
+                  <Tab>{formatMessage({ id: getTrad('Settings.variations.modal.advanced') })}</Tab>
                 </Tabs>
 
                 <TabsPanel>{children}</TabsPanel>

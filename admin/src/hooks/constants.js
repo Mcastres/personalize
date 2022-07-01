@@ -1,6 +1,6 @@
 import pluginId from '../pluginId';
 
-export const RESOLVE_LOCALES = `${pluginId}/locales/resolve-locales`;
-export const ADD_LOCALE = `${pluginId}/locales/add`;
-export const DELETE_LOCALE = `${pluginId}/locales/delete`;
-export const UPDATE_LOCALE = `${pluginId}/locales/update`;
+export const RESOLVE_VARIATIONS = `${pluginId}/variations/resolve-variations`;
+export const ADD_VARIATION = `${pluginId}/variations/add`;
+export const DELETE_VARIATION = `${pluginId}/variations/delete`;
+export const UPDATE_VARIATION = `${pluginId}/variations/update`;

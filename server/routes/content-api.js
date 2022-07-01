@@ -5,8 +5,8 @@ module.exports = {
   routes: [
     {
       method: 'GET',
-      path: '/locales',
-      handler: 'locales.listLocales',
+      path: '/variations',
+      handler: 'variations.listVariations',
     },
   ],
 };

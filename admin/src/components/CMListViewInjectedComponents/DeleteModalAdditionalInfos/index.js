@@ -2,13 +2,13 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import { Typography } from '@strapi/design-system/Typography';
 import { getTrad } from '../../../utils';
-import useHasI18n from '../../../hooks/useHasI18n';
+import useHasPersonalization from "../../../hooks/useHasPersonalization";
 
 const DeleteModalAdditionalInfos = () => {
-  const hasI18nEnabled = useHasI18n();
+  const hasPersonalizationEnabled = useHasPersonalization();
   const { formatMessage } = useIntl();
 
-  if (!hasI18nEnabled) {
+  if (!hasPersonalizationEnabled) {
     return null;
   }
 
@@ -18,7 +18,7 @@ const DeleteModalAdditionalInfos = () => {
         {
           id: getTrad('Settings.list.actions.deleteAdditionalInfos'),
           defaultMessage:
-            'This will delete the active locale versions <em>(from Internationalization)</em>',
+            'This will delete the active variation versions <em>(from Internationalization)</em>',
         },
         {
           em: chunks => (

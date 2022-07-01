@@ -1,11 +1,11 @@
 import React from 'react';
 import get from 'lodash/get';
-import LocaleListCell from '../components/LocaleListCell/LocaleListCell';
+import VariationListCell from '../components/VariationListCell/VariationListCell';
 
 const addColumnToTableHook = ({ displayedHeaders, layout }) => {
-  const isFieldLocalized = get(layout, 'contentType.pluginOptions.i18n.localized', false);
+  const isFieldPersonalized = get(layout, 'contentType.pluginOptions.personalization.personalized', false);
 
-  if (!isFieldLocalized) {
+  if (!isFieldPersonalized) {
     return { displayedHeaders, layout };
   }
 
@@ -13,11 +13,11 @@ const addColumnToTableHook = ({ displayedHeaders, layout }) => {
     displayedHeaders: [
       ...displayedHeaders,
       {
-        key: '__locale_key__',
+        key: '__variation_key__',
         fieldSchema: { type: 'string' },
         metadatas: { label: 'Content available in', searchable: false, sortable: false },
-        name: 'locales',
-        cellFormatter: props => <LocaleListCell {...props} />,
+        name: 'variations',
+        cellFormatter: props => <VariationListCell {...props} />,
       },
     ],
     layout,

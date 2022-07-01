@@ -2,20 +2,20 @@
 
 const { after } = require('../field');
 
-describe('i18n - Migration - disable localization on a field', () => {
+describe('personalization - Migration - disable personalization on a field', () => {
   describe('after', () => {
     describe('Should not migrate', () => {
-      test("Doesn't migrate if model isn't localized", async () => {
+      test("Doesn't migrate if model isn't personalized", async () => {
         const find = jest.fn();
         global.strapi = {
           query() {
             find;
           },
           plugins: {
-            i18n: {
+            personalization: {
               services: {
                 'content-types': {
-                  isLocalizedContentType: () => false,
+                  isPersonalizedContentType: () => false,
                 },
               },
             },
@@ -29,20 +29,20 @@ describe('i18n - Migration - disable localization on a field', () => {
         expect(find).not.toHaveBeenCalled();
       });
 
-      test("Doesn't migrate if no attribute changed (without i18n)", async () => {
+      test("Doesn't migrate if no attribute changed (without personalization)", async () => {
         const find = jest.fn();
-        const getLocalizedAttributes = jest.fn(() => []);
+        const getPersonalizedAttributes = jest.fn(() => []);
 
         global.strapi = {
           query() {
             find;
           },
           plugins: {
-            i18n: {
+            personalization: {
               services: {
                 'content-types': {
-                  isLocalizedContentType: () => true,
-                  getLocalizedAttributes,
+                  isPersonalizedContentType: () => true,
+                  getPersonalizedAttributes,
                 },
               },
             },
@@ -53,23 +53,23 @@ describe('i18n - Migration - disable localization on a field', () => {
         const previousDefinition = { attributes: { name: {} } };
 
         await after({ model, definition: model, previousDefinition });
-        expect(getLocalizedAttributes).toHaveBeenCalledTimes(2);
+        expect(getPersonalizedAttributes).toHaveBeenCalledTimes(2);
         expect(find).not.toHaveBeenCalled();
       });
 
-      test("Doesn't migrate if no attribute changed (with i18n)", async () => {
+      test("Doesn't migrate if no attribute changed (with personalization)", async () => {
         const find = jest.fn();
-        const getLocalizedAttributes = jest.fn(() => ['name']);
+        const getPersonalizedAttributes = jest.fn(() => ['name']);
         global.strapi = {
           query() {
             find;
           },
           plugins: {
-            i18n: {
+            personalization: {
               services: {
                 'content-types': {
-                  isLocalizedContentType: () => true,
-                  getLocalizedAttributes,
+                  isPersonalizedContentType: () => true,
+                  getPersonalizedAttributes,
                 },
               },
             },
@@ -80,13 +80,13 @@ describe('i18n - Migration - disable localization on a field', () => {
         const previousDefinition = { attributes: { name: {} } };
 
         await after({ model, definition: model, previousDefinition });
-        expect(getLocalizedAttributes).toHaveBeenCalledTimes(2);
+        expect(getPersonalizedAttributes).toHaveBeenCalledTimes(2);
         expect(find).not.toHaveBeenCalled();
       });
 
-      test("Doesn't migrate if field become localized", async () => {
+      test("Doesn't migrate if field become personalized", async () => {
         const find = jest.fn();
-        const getLocalizedAttributes = jest
+        const getPersonalizedAttributes = jest
           .fn()
           .mockReturnValueOnce(['name'])
           .mockReturnValueOnce([]);
@@ -96,11 +96,11 @@ describe('i18n - Migration - disable localization on a field', () => {
             find;
           },
           plugins: {
-            i18n: {
+            personalization: {
               services: {
                 'content-types': {
-                  isLocalizedContentType: () => true,
-                  getLocalizedAttributes,
+                  isPersonalizedContentType: () => true,
+                  getPersonalizedAttributes,
                 },
               },
             },
@@ -111,13 +111,13 @@ describe('i18n - Migration - disable localization on a field', () => {
         const previousDefinition = { attributes: { name: {} } };
 
         await after({ model, definition: model, previousDefinition });
-        expect(getLocalizedAttributes).toHaveBeenCalledTimes(2);
+        expect(getPersonalizedAttributes).toHaveBeenCalledTimes(2);
         expect(find).not.toHaveBeenCalled();
       });
 
       test("Doesn't migrate if field is deleted", async () => {
         const find = jest.fn();
-        const getLocalizedAttributes = jest
+        const getPersonalizedAttributes = jest
           .fn()
           .mockReturnValueOnce([])
           .mockReturnValueOnce(['name']);
@@ -127,11 +127,11 @@ describe('i18n - Migration - disable localization on a field', () => {
             find;
           },
           plugins: {
-            i18n: {
+            personalization: {
               services: {
                 'content-types': {
-                  isLocalizedContentType: () => true,
-                  getLocalizedAttributes,
+                  isPersonalizedContentType: () => true,
+                  getPersonalizedAttributes,
                 },
               },
             },
@@ -142,7 +142,7 @@ describe('i18n - Migration - disable localization on a field', () => {
         const previousDefinition = { attributes: { name: {} } };
 
         await after({ model, definition: model, previousDefinition });
-        expect(getLocalizedAttributes).toHaveBeenCalledTimes(2);
+        expect(getPersonalizedAttributes).toHaveBeenCalledTimes(2);
         expect(find).not.toHaveBeenCalled();
       });
     });

@@ -6,4 +6,4 @@
 
 const { createCoreService } = require('@strapi/strapi').factories;
 
-module.exports = createCoreService('plugin::i18n.variation-type');
+module.exports = createCoreService('plugin::personalization.variation-type');

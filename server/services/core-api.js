@@ -11,21 +11,21 @@ const { ApplicationError, NotFoundError } = utils.errors;
 const { getContentTypeRoutePrefix, isSingleType, getWritableAttributes } = contentTypes;
 
 /**
- * Returns all locales for an entry
+ * Returns all variations for an entry
  * @param {object} entry
  * @returns {string[]}
  */
-const getAllLocales = entry => {
-  return [entry.locale, ...map(prop('locale'), entry.localizations)];
+const getAllVariations = entry => {
+  return [entry.variation, ...map(prop('variation'), entry.personalizations)];
 };
 
 /**
- * Returns all localizations ids for an entry
+ * Returns all personalizations ids for an entry
  * @param {object} entry
  * @returns {any[]}
  */
-const getAllLocalizationsIds = entry => {
-  return [entry.id, ...map(prop('id'), entry.localizations)];
+const getAllPersonalizationsIds = entry => {
+  return [entry.id, ...map(prop('id'), entry.personalizations)];
 };
 
 /**
@@ -38,12 +38,12 @@ const getAllLocalizationsIds = entry => {
  */
 const createSanitizer = contentType => {
   /**
-   * Returns the writable attributes of a content type in the localization routes
+   * Returns the writable attributes of a content type in the personalization routes
    * @returns {string[]}
    */
   const getAllowedAttributes = () => {
     return getWritableAttributes(contentType).filter(
-      attributeName => !['locale', 'localizations'].includes(attributeName)
+      attributeName => !['variation', 'personalizations'].includes(attributeName)
     );
   };
 
@@ -81,12 +81,12 @@ const createSanitizer = contentType => {
 };
 
 /**
- * Returns a handler to handle localizations creation in the core api
+ * Returns a handler to handle personalizations creation in the core api
  * @param {object} contentType
  * @returns {(object) => void}
  */
-const createLocalizationHandler = contentType => {
-  const handler = createCreateLocalizationHandler(contentType);
+const createPersonalizationHandler = contentType => {
+  const handler = createCreatePersonalizationHandler(contentType);
 
   return (ctx = {}) => {
     const { id } = ctx.params;
@@ -96,16 +96,16 @@ const createLocalizationHandler = contentType => {
   };
 };
 
-const createCreateLocalizationHandler = contentType => async (args = {}) => {
-  const { copyNonLocalizedAttributes } = getService('content-types');
+const createCreatePersonalizationHandler = contentType => async (args = {}) => {
+  const { copyNonPersonalizedAttributes } = getService('content-types');
 
   const { sanitizeInput, sanitizeInputFiles } = createSanitizer(contentType);
 
   const entry = isSingleType(contentType)
-    ? await strapi.query(contentType.uid).findOne({ populate: ['localizations'] })
+    ? await strapi.query(contentType.uid).findOne({ populate: ['personalizations'] })
     : await strapi
         .query(contentType.uid)
-        .findOne({ where: { id: args.id }, populate: ['localizations'] });
+        .findOne({ where: { id: args.id }, populate: ['personalizations'] });
 
   if (!entry) {
     throw new NotFoundError();
@@ -113,27 +113,27 @@ const createCreateLocalizationHandler = contentType => async (args = {}) => {
 
   const { data, files } = args;
 
-  const { findBySlug } = getService('locales');
+  const { findBySlug } = getService('variations');
 
-  if (isNil(data.locale)) {
-    throw new ApplicationError('locale is missing');
+  if (isNil(data.variation)) {
+    throw new ApplicationError('variation is missing');
   }
 
-  const matchingLocale = await findBySlug(data.locale);
-  if (!matchingLocale) {
-    throw new ApplicationError('locale is invalid');
+  const matchingVariation = await findBySlug(data.variation);
+  if (!matchingVariation) {
+    throw new ApplicationError('variation is invalid');
   }
 
-  const usedLocales = getAllLocales(entry);
-  if (usedLocales.includes(data.locale)) {
-    throw new ApplicationError('locale is already used');
+  const usedVariations = getAllVariations(entry);
+  if (usedVariations.includes(data.variation)) {
+    throw new ApplicationError('variation is already used');
   }
 
   const sanitizedData = {
-    ...copyNonLocalizedAttributes(contentType, entry),
+    ...copyNonPersonalizedAttributes(contentType, entry),
     ...sanitizeInput(data),
-    locale: data.locale,
-    localizations: getAllLocalizationsIds(entry),
+    variation: data.variation,
+    personalizations: getAllPersonalizationsIds(entry),
   };
 
   const sanitizedFiles = sanitizeInputFiles(files);
@@ -141,29 +141,29 @@ const createCreateLocalizationHandler = contentType => async (args = {}) => {
   const newEntry = await strapi.entityService.create(contentType.uid, {
     data: sanitizedData,
     files: sanitizedFiles,
-    populate: ['localizations'],
+    populate: ['personalizations'],
   });
 
   return sanitize.contentAPI.output(newEntry, strapi.getModel(contentType.uid));
 };
 
 /**
- * Returns a route config to handle localizations creation in the core api
+ * Returns a route config to handle personalizations creation in the core api
  * @param {object} contentType
  * @returns {{ method: string, path: string, handler: string, config: { policies: string[] }}}
  */
-const createLocalizationRoute = contentType => {
+const createPersonalizationRoute = contentType => {
   const { modelName } = contentType;
 
   const routePrefix = getContentTypeRoutePrefix(contentType);
   const routePath = isSingleType(contentType)
-    ? `/${routePrefix}/localizations`
-    : `/${routePrefix}/:id/localizations`;
+    ? `/${routePrefix}/personalizations`
+    : `/${routePrefix}/:id/personalizations`;
 
   return {
     method: 'POST',
     path: routePath,
-    handler: `${modelName}.createLocalization`,
+    handler: `${modelName}.createPersonalization`,
     config: {
       policies: [],
     },
@@ -171,19 +171,19 @@ const createLocalizationRoute = contentType => {
 };
 
 /**
- * Adds a route & an action to the core api controller of a content type to allow creating new localizations
+ * Adds a route & an action to the core api controller of a content type to allow creating new personalizations
  * @param {object} contentType
  */
-const addCreateLocalizationAction = contentType => {
+const addCreatePersonalizationAction = contentType => {
   const { modelName, apiName } = contentType;
 
-  const localizationRoute = createLocalizationRoute(contentType);
+  const personalizationRoute = createPersonalizationRoute(contentType);
 
-  strapi.api[apiName].routes[modelName].routes.push(localizationRoute);
+  strapi.api[apiName].routes[modelName].routes.push(personalizationRoute);
 
   strapi.container.get('controllers').extend(`api::${apiName}.${modelName}`, controller => {
     return Object.assign(controller, {
-      createLocalization: createLocalizationHandler(contentType),
+      createPersonalization: createPersonalizationHandler(contentType),
     });
   });
 };
@@ -199,14 +199,14 @@ const mergeCustomizer = (dest, src) => {
  * @param {object} schema
  */
 const addGraphqlSchema = schema => {
-  _.mergeWith(strapi.config.get('plugin.i18n.schema.graphql'), schema, mergeCustomizer);
+  _.mergeWith(strapi.config.get('plugin.personalization.schema.graphql'), schema, mergeCustomizer);
 };
 
 /**
- * Add localization mutation & filters to use with the graphql plugin
+ * Add personalization mutation & filters to use with the graphql plugin
  * @param {object} contentType
  */
-const addGraphqlLocalizationAction = contentType => {
+const addGraphqlPersonalizationAction = contentType => {
   const { globalId, modelName } = contentType;
 
   if (!strapi.plugins.graphql) {
@@ -215,15 +215,15 @@ const addGraphqlLocalizationAction = contentType => {
 
   const { toSingular, toPlural } = strapi.plugin('graphql').service('naming');
 
-  // We use a string instead of an enum as the locales can be changed in the admin
+  // We use a string instead of an enum as the variations can be changed in the admin
   // NOTE: We could use a custom scalar so the validation becomes dynamic
-  const localeArgs = {
+  const variationArgs = {
     args: {
-      locale: 'String',
+      variation: 'String',
     },
   };
 
-  // add locale arguments in the existing queries
+  // add variation arguments in the existing queries
   if (isSingleType(contentType)) {
     const queryName = toSingular(modelName);
     const mutationSuffix = _.upperFirst(queryName);
@@ -231,11 +231,11 @@ const addGraphqlLocalizationAction = contentType => {
     addGraphqlSchema({
       resolver: {
         Query: {
-          [queryName]: localeArgs,
+          [queryName]: variationArgs,
         },
         Mutation: {
-          [`update${mutationSuffix}`]: localeArgs,
-          [`delete${mutationSuffix}`]: localeArgs,
+          [`update${mutationSuffix}`]: variationArgs,
+          [`delete${mutationSuffix}`]: variationArgs,
         },
       },
     });
@@ -245,20 +245,20 @@ const addGraphqlLocalizationAction = contentType => {
     addGraphqlSchema({
       resolver: {
         Query: {
-          [queryName]: localeArgs,
-          [`${queryName}Connection`]: localeArgs,
+          [queryName]: variationArgs,
+          [`${queryName}Connection`]: variationArgs,
         },
       },
     });
   }
 
-  // add new mutation to create a localization
+  // add new mutation to create a personalization
   const typeName = globalId;
 
   const capitalizedName = _.upperFirst(toSingular(modelName));
-  const mutationName = `create${capitalizedName}Localization`;
+  const mutationName = `create${capitalizedName}Personalization`;
   const mutationDef = `${mutationName}(input: update${capitalizedName}Input!): ${typeName}!`;
-  const actionName = `${contentType.uid}.createLocalization`;
+  const actionName = `${contentType.uid}.createPersonalization`;
 
   addGraphqlSchema({
     mutation: mutationDef,
@@ -273,8 +273,8 @@ const addGraphqlLocalizationAction = contentType => {
 };
 
 module.exports = () => ({
-  addCreateLocalizationAction,
-  addGraphqlLocalizationAction,
+  addCreatePersonalizationAction,
+  addGraphqlPersonalizationAction,
   createSanitizer,
-  createCreateLocalizationHandler,
+  createCreatePersonalizationHandler,
 });

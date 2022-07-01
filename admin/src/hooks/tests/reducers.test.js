@@ -1,28 +1,28 @@
 import reducers, { initialState } from '../reducers';
-import { RESOLVE_LOCALES, ADD_LOCALE, DELETE_LOCALE, UPDATE_LOCALE } from '../constants';
+import { RESOLVE_VARIATIONS, ADD_VARIATION, DELETE_LOCALE, UPDATE_LOCALE } from '../constants';
 
-describe('i18n reducer', () => {
+describe('personalization reducer', () => {
   it('resolves the initial state when the action is not known', () => {
     const action = {
       type: 'UNKNWON_ACTION',
     };
 
-    const actual = reducers.i18n_locales(initialState, action);
+    const actual = reducers.personalization_variations(initialState, action);
     const expected = initialState;
 
     expect(actual).toEqual(expected);
   });
 
-  it('resolves a list of locales when triggering RESOLVE_LOCALES', () => {
+  it('resolves a list of variations when triggering RESOLVE_VARIATIONS', () => {
     const action = {
-      type: RESOLVE_LOCALES,
-      locales: [{ id: 1, displayName: 'French', isDefault: false }],
+      type: RESOLVE_VARIATIONS,
+      variations: [{ id: 1, displayName: 'French', isDefault: false }],
     };
 
-    const actual = reducers.i18n_locales(initialState, action);
+    const actual = reducers.personalization_variations(initialState, action);
     const expected = {
       isLoading: false,
-      locales: [
+      variations: [
         {
           displayName: 'French',
           id: 1,
@@ -34,16 +34,16 @@ describe('i18n reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  it('adds a locale when triggering ADD_LOCALE', () => {
+  it('adds a variation when triggering ADD_VARIATION', () => {
     const action = {
-      type: ADD_LOCALE,
-      newLocale: { id: 1, displayName: 'French', isDefault: false },
+      type: ADD_VARIATION,
+      newVariation: { id: 1, displayName: 'French', isDefault: false },
     };
 
-    const actual = reducers.i18n_locales(initialState, action);
+    const actual = reducers.personalization_variations(initialState, action);
     const expected = {
       isLoading: true,
-      locales: [
+      variations: [
         {
           displayName: 'French',
           id: 1,
@@ -55,13 +55,13 @@ describe('i18n reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  it('adds a locale when triggering ADD_LOCALE and set it to default', () => {
+  it('adds a variation when triggering ADD_VARIATION and set it to default', () => {
     const action = {
-      type: ADD_LOCALE,
-      newLocale: { id: 1, displayName: 'French', isDefault: true },
+      type: ADD_VARIATION,
+      newVariation: { id: 1, displayName: 'French', isDefault: true },
     };
 
-    const locales = [
+    const variations = [
       {
         displayName: 'English',
         id: 2,
@@ -69,10 +69,10 @@ describe('i18n reducer', () => {
       },
     ];
 
-    const actual = reducers.i18n_locales({ ...initialState, locales }, action);
+    const actual = reducers.personalization_variations({ ...initialState, variations }, action);
     const expected = {
       isLoading: true,
-      locales: [
+      variations: [
         {
           displayName: 'English',
           id: 2,
@@ -89,13 +89,13 @@ describe('i18n reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  it('removes a locale when triggering DELETE_LOCALE ', () => {
+  it('removes a variation when triggering DELETE_VARIATION ', () => {
     const action = {
-      type: DELETE_LOCALE,
+      type: DELETE_VARIATION,
       id: 2,
     };
 
-    const locales = [
+    const variations = [
       {
         displayName: 'French',
         id: 1,
@@ -108,10 +108,10 @@ describe('i18n reducer', () => {
       },
     ];
 
-    const actual = reducers.i18n_locales({ ...initialState, locales }, action);
+    const actual = reducers.personalization_variations({ ...initialState, variations }, action);
     const expected = {
       isLoading: true,
-      locales: [
+      variations: [
         {
           displayName: 'French',
           id: 1,
@@ -123,13 +123,13 @@ describe('i18n reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  it('updates a locale when triggering UPDATE_LOCALE', () => {
+  it('updates a variation when triggering UPDATE_VARIATION', () => {
     const action = {
-      type: UPDATE_LOCALE,
-      editedLocale: { id: 1, displayName: 'Frenchie', isDefault: false },
+      type: UPDATE_VARIATION,
+      editedVariation: { id: 1, displayName: 'Frenchie', isDefault: false },
     };
 
-    const locales = [
+    const variations = [
       {
         displayName: 'English',
         id: 2,
@@ -142,10 +142,10 @@ describe('i18n reducer', () => {
       },
     ];
 
-    const actual = reducers.i18n_locales({ ...initialState, locales }, action);
+    const actual = reducers.personalization_variations({ ...initialState, variations }, action);
     const expected = {
       isLoading: true,
-      locales: [
+      variations: [
         {
           displayName: 'English',
           id: 2,
@@ -162,13 +162,13 @@ describe('i18n reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  it('updates a locale when triggering UPDATE_LOCALE and set it to default', () => {
+  it('updates a variation when triggering UPDATE_VARIATION and set it to default', () => {
     const action = {
-      type: UPDATE_LOCALE,
-      editedLocale: { id: 1, displayName: 'Frenchie', isDefault: true },
+      type: UPDATE_VARIATION,
+      editedVariation: { id: 1, displayName: 'Frenchie', isDefault: true },
     };
 
-    const locales = [
+    const variations = [
       {
         displayName: 'English',
         id: 2,
@@ -181,10 +181,10 @@ describe('i18n reducer', () => {
       },
     ];
 
-    const actual = reducers.i18n_locales({ ...initialState, locales }, action);
+    const actual = reducers.personalization_variations({ ...initialState, variations }, action);
     const expected = {
       isLoading: true,
-      locales: [
+      variations: [
         {
           displayName: 'English',
           id: 2,

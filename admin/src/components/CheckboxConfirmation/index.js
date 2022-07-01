@@ -73,7 +73,7 @@ const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChan
                   {formatMessage({
                     id: getTrad('CheckboxConfirmation.Modal.content'),
                     defaultMessage:
-                      'Disabling localization will engender the deletion of all your content but the one associated to your default locale (if existing).',
+                      'Disabling personalization will engender the deletion of all your content but the one associated to your default variation (if existing).',
                   })}
                 </TextAlignTypography>
               </Flex>

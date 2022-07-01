@@ -1,9 +1,9 @@
-const i18nPermissions = {
-  accessMain: [{ action: 'plugin::i18n.locale.read', subject: null }],
-  create: [{ action: 'plugin::i18n.locale.create', subject: null }],
-  delete: [{ action: 'plugin::i18n.locale.delete', subject: null }],
-  update: [{ action: 'plugin::i18n.locale.update', subject: null }],
-  read: [{ action: 'plugin::i18n.locale.read', subject: null }],
+const personalizationPermissions = {
+  accessMain: [{ action: 'plugin::personalization.variation.read', subject: null }],
+  create: [{ action: 'plugin::personalization.variation.create', subject: null }],
+  delete: [{ action: 'plugin::personalization.variation.delete', subject: null }],
+  update: [{ action: 'plugin::personalization.variation.update', subject: null }],
+  read: [{ action: 'plugin::personalization.variation.read', subject: null }],
 };
 
-export default i18nPermissions;
+export default personalizationPermissions;

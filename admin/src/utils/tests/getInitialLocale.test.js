@@ -1,17 +1,17 @@
-import getInitialLocale from '../getInitialLocale';
+import getInitialVariation from '../getInitialVariation';
 
-describe('getInitialLocale', () => {
-  it('gives "fr-FR" when the query.plugins.locale is "fr-FR"', () => {
+describe('getInitialVariation', () => {
+  it('gives "fr-FR" when the query.plugins.variation is "fr-FR"', () => {
     const query = {
       page: '1',
       pageSize: '10',
       sort: 'Name:ASC',
       plugins: {
-        i18n: { locale: 'fr-FR' },
+        personalization: { variation: 'fr-FR' },
       },
     };
 
-    const locales = [
+    const variations = [
       {
         id: 1,
         name: 'English',
@@ -38,12 +38,12 @@ describe('getInitialLocale', () => {
       updatedAt: '2021-03-09T15:03:06.996Z',
       isDefault: false,
     };
-    const actual = getInitialLocale(query, locales);
+    const actual = getInitialVariation(query, variations);
 
     expect(actual).toEqual(expected);
   });
 
-  it('gives the default locale ("en") when there s no locale in the query', () => {
+  it('gives the default variation ("en") when there s no locale in the query', () => {
     const query = {
       page: '1',
       pageSize: '10',
@@ -53,7 +53,7 @@ describe('getInitialLocale', () => {
       },
     };
 
-    const locales = [
+    const variations = [
       {
         id: 2,
         name: 'French (France) (fr-FR)',
@@ -81,12 +81,12 @@ describe('getInitialLocale', () => {
       isDefault: true,
     };
 
-    const actual = getInitialLocale(query, locales);
+    const actual = getInitialVariation(query, variations);
 
     expect(actual).toEqual(expected);
   });
 
-  it('gives "undefined" when theres no locale. IMPORTANT: such case should not exist since at least one locale is created on the backend when plug-in i18n', () => {
+  it('gives "undefined" when theres no variation. IMPORTANT: such case should not exist since at least one locale is created on the backend when plug-in personalization', () => {
     const query = {
       page: '1',
       pageSize: '10',
@@ -96,10 +96,10 @@ describe('getInitialLocale', () => {
       },
     };
 
-    const locales = [];
+    const variations = [];
 
     const expected = undefined;
-    const actual = getInitialLocale(query, locales);
+    const actual = getInitialVariation(query, variations);
 
     expect(actual).toEqual(expected);
   });

@@ -5,72 +5,72 @@ module.exports = {
   routes: [
     {
       method: "GET",
-      path: "/iso-locales",
-      handler: "iso-locales.listIsoLocales",
+      path: "/iso-variations",
+      handler: "iso-variations.listIsoVariations",
       config: {
         policies: [
           "admin::isAuthenticatedAdmin",
           {
             name: "plugin::content-manager.hasPermissions",
-            config: { actions: ["plugin::i18n.locale.read"] },
+            config: { actions: ["plugin::personalization.variation.read"] },
           },
         ],
       },
     },
     {
       method: "GET",
-      path: "/locales",
-      handler: "locales.listLocales",
+      path: "/variations",
+      handler: "variations.listVariations",
       config: {
         policies: ["admin::isAuthenticatedAdmin"],
       },
     },
     {
       method: "POST",
-      path: "/locales",
-      handler: "locales.createLocale",
+      path: "/variations",
+      handler: "variations.createVariation",
       config: {
         policies: [
           "admin::isAuthenticatedAdmin",
           {
             name: "plugin::content-manager.hasPermissions",
-            config: { actions: ["plugin::i18n.locale.create"] },
+            config: { actions: ["plugin::personalization.variation.create"] },
           },
         ],
       },
     },
     {
       method: "PUT",
-      path: "/locales/:id",
-      handler: "locales.updateLocale",
+      path: "/variations/:id",
+      handler: "variations.updateVariation",
       config: {
         policies: [
           "admin::isAuthenticatedAdmin",
           {
             name: "plugin::content-manager.hasPermissions",
-            config: { actions: ["plugin::i18n.locale.update"] },
+            config: { actions: ["plugin::personalization.variation.update"] },
           },
         ],
       },
     },
     {
       method: "DELETE",
-      path: "/locales/:id",
-      handler: "locales.deleteLocale",
+      path: "/variations/:id",
+      handler: "variations.deleteVariation",
       config: {
         policies: [
           "admin::isAuthenticatedAdmin",
           {
             name: "plugin::content-manager.hasPermissions",
-            config: { actions: ["plugin::i18n.locale.delete"] },
+            config: { actions: ["plugin::personalization.variation.delete"] },
           },
         ],
       },
     },
     {
       method: "POST",
-      path: "/content-manager/actions/get-non-localized-fields",
-      handler: "content-types.getNonLocalizedAttributes",
+      path: "/content-manager/actions/get-non-personalized-fields",
+      handler: "content-types.getNonPersonalizedAttributes",
       config: {
         policies: ["admin::isAuthenticatedAdmin"],
       },

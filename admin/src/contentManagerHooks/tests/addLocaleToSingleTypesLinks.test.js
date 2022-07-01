@@ -1,13 +1,13 @@
 import { fixtures } from '../../../../../../admin-test-utils/lib';
-import addLocaleToSingleTypesLinks from '../addLocaleToSingleTypesLinks';
+import addVariationToSingleTypesLinks from '../addVariationToSingleTypesLinks';
 
-describe('i18n | contentManagerHooks | addLocaleToSingleTypesLinks', () => {
+describe('personalization | contentManagerHooks | addVariationToSingleTypesLinks', () => {
   let store;
 
   beforeEach(() => {
     store = {
       ...fixtures.store.state,
-      i18n_locales: { locales: [] },
+      personalization_variations: { variations: [] },
     };
     store.rbacProvider.allPermissions = [];
 
@@ -29,83 +29,83 @@ describe('i18n | contentManagerHooks | addLocaleToSingleTypesLinks', () => {
       models: [],
     };
 
-    const results = addLocaleToSingleTypesLinks(data, store);
+    const results = addVariationToSingleTypesLinks(data, store);
 
     expect(results).toEqual(data);
   });
 
-  it('should not add the search key to a single type link when i18n is not enabled on the single type', () => {
+  it('should not add the search key to a single type link when personalization is not enabled on the single type', () => {
     const data = {
       stLinks: [{ to: 'cm/singleType/test' }],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: false } } }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: false } } }],
     };
 
-    const results = addLocaleToSingleTypesLinks(data, store);
+    const results = addVariationToSingleTypesLinks(data, store);
 
     expect(results).toEqual(data);
   });
 
-  it('should add a search key with the default locale when the user has the right to read it', () => {
-    store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
+  it('should add a search key with the default variation when the user has the right to read it', () => {
+    store.personalization_variations.variations = [{ code: 'en', isDefault: true }];
     store.rbacProvider.collectionTypesRelatedPermissions.test[
       'plugin::content-manager.explorer.read'
-    ] = [{ properties: { locales: ['en'] } }];
+    ] = [{ properties: { variations: ['en'] } }];
 
     const data = {
       stLinks: [{ to: 'cm/singleType/test' }],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: true } } }],
     };
 
-    const results = addLocaleToSingleTypesLinks(data, store);
+    const results = addVariationToSingleTypesLinks(data, store);
 
     const expected = {
-      stLinks: [{ to: 'cm/singleType/test', search: 'plugins[i18n][locale]=en' }],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
+      stLinks: [{ to: 'cm/singleType/test', search: 'plugins[personalization][variation]=en' }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: true } } }],
     };
 
     expect(results).toEqual(expected);
   });
 
-  it('should set the isDisplayed key to false when the user does not have the right to read any locale', () => {
-    store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
+  it('should set the isDisplayed key to false when the user does not have the right to read any variation', () => {
+    store.personalization_variations.variations = [{ code: 'en', isDefault: true }];
     store.rbacProvider.collectionTypesRelatedPermissions.test[
       'plugin::content-manager.explorer.read'
-    ] = [{ properties: { locales: [] } }];
+    ] = [{ properties: { variations: [] } }];
 
     const data = {
       stLinks: [{ to: 'cm/singleType/test' }],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: true } } }],
     };
-    const results = addLocaleToSingleTypesLinks(data, store);
+    const results = addVariationToSingleTypesLinks(data, store);
 
     const expected = {
       stLinks: [{ to: 'cm/singleType/test', isDisplayed: false }],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: true } } }],
     };
 
     expect(results).toEqual(expected);
   });
 
   it('should keep the previous search', () => {
-    store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
+    store.personalization_variations.variations = [{ code: 'en', isDefault: true }];
     store.rbacProvider.collectionTypesRelatedPermissions.test[
       'plugin::content-manager.explorer.read'
-    ] = [{ properties: { locales: ['en'] } }];
+    ] = [{ properties: { variations: ['en'] } }];
 
     const data = {
       stLinks: [{ to: 'cm/singleType/test', search: 'plugins[plugin][test]=test' }],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: true } } }],
     };
-    const results = addLocaleToSingleTypesLinks(data, store);
+    const results = addVariationToSingleTypesLinks(data, store);
 
     const expected = {
       stLinks: [
         {
           to: 'cm/singleType/test',
-          search: 'plugins[plugin][test]=test&plugins[i18n][locale]=en',
+          search: 'plugins[plugin][test]=test&plugins[personalization][variation]=en',
         },
       ],
-      models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
+      models: [{ uid: 'test', pluginOptions: { personalization: { personalized: true } } }],
     };
 
     expect(results).toEqual(expected);

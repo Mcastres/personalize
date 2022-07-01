@@ -10,8 +10,8 @@ const { getService } = require('../../utils');
  */
 
 /**
- * Locales property handler for the permission engine
- * Add the has-locale-access condition if the locales property is defined
+ * Variations property handler for the permission engine
+ * Add the has-variation-access condition if the variations property is defined
  * @param {WillRegisterPermissionContext} context
  */
 const willRegisterPermission = context => {
@@ -24,8 +24,8 @@ const willRegisterPermission = context => {
     return;
   }
 
-  const { locales } = properties || {};
-  const { isLocalizedContentType } = getService('content-types');
+  const { variations } = properties || {};
+  const { isPersonalizedContentType } = getService('content-types');
 
   // If there is no subject defined, ignore the permission
   if (!subject) {
@@ -34,24 +34,24 @@ const willRegisterPermission = context => {
 
   const ct = strapi.contentTypes[subject];
 
-  // If the subject exists but isn't localized, ignore the permission
-  if (!isLocalizedContentType(ct)) {
+  // If the subject exists but isn't personalized, ignore the permission
+  if (!isPersonalizedContentType(ct)) {
     return;
   }
 
-  // If the subject is localized but the locales property is null (access to all locales), ignore the permission
-  if (locales === null) {
+  // If the subject is personalized but the variations property is null (access to all variations), ignore the permission
+  if (variations === null) {
     return;
   }
 
   condition.and({
-    locale: {
-      $in: locales || [],
+    variation: {
+      $in: variations || [],
     },
   });
 };
 
-const registerI18nPermissionsHandlers = () => {
+const registerPersonalizationPermissionsHandlers = () => {
   const { engine } = strapi.admin.services.permission;
 
   engine.hooks.willRegisterPermission.register(willRegisterPermission);
@@ -59,5 +59,5 @@ const registerI18nPermissionsHandlers = () => {
 
 module.exports = {
   willRegisterPermission,
-  registerI18nPermissionsHandlers,
+  registerPersonalizationPermissionsHandlers,
 };

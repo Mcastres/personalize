@@ -1,51 +1,51 @@
 import produce from 'immer';
 import set from 'lodash/set';
 import pluginId from '../pluginId';
-import { RESOLVE_LOCALES, ADD_LOCALE, DELETE_LOCALE, UPDATE_LOCALE } from './constants';
+import { RESOLVE_VARIATIONS, ADD_VARIATION, DELETE_VARIATION, UPDATE_VARIATION } from './constants';
 
 export const initialState = {
   isLoading: true,
-  locales: [],
+  variations: [],
 };
 
-const localeReducer = produce((draftState = initialState, action) => {
+const variationReducer = produce((draftState = initialState, action) => {
   switch (action.type) {
-    case RESOLVE_LOCALES: {
+    case RESOLVE_VARIATIONS: {
       draftState.isLoading = false;
-      draftState.locales = action.locales;
+      draftState.variations = action.variations;
       break;
     }
 
-    case ADD_LOCALE: {
-      if (action.newLocale.isDefault) {
-        draftState.locales.forEach(locale => {
-          locale.isDefault = false;
+    case ADD_VARIATION: {
+      if (action.newVariation.isDefault) {
+        draftState.variations.forEach(variation => {
+          variation.isDefault = false;
         });
       }
 
-      draftState.locales.push(action.newLocale);
+      draftState.variations.push(action.newVariation);
       break;
     }
 
-    case DELETE_LOCALE: {
-      const locales = draftState.locales.filter(locale => locale.id !== action.id);
+    case DELETE_VARIATION: {
+      const variations = draftState.variations.filter(variation => variation.id !== action.id);
 
-      set(draftState, 'locales', locales);
+      set(draftState, 'variations', variations);
       break;
     }
 
-    case UPDATE_LOCALE: {
-      if (action.editedLocale.isDefault) {
-        draftState.locales.forEach(locale => {
-          locale.isDefault = false;
+    case UPDATE_VARIATION: {
+      if (action.editedVariation.isDefault) {
+        draftState.variations.forEach(variation => {
+          variation.isDefault = false;
         });
       }
 
-      const indexToEdit = draftState.locales.findIndex(
-        locale => locale.id === action.editedLocale.id
+      const indexToEdit = draftState.variations.findIndex(
+        variation => variation.id === action.editedVariation.id
       );
 
-      set(draftState.locales, indexToEdit, action.editedLocale);
+      set(draftState.variations, indexToEdit, action.editedVariation);
       break;
     }
 
@@ -57,7 +57,7 @@ const localeReducer = produce((draftState = initialState, action) => {
 });
 
 const reducers = {
-  [`${pluginId}_locales`]: localeReducer,
+  [`${pluginId}_variations`]: variationReducer,
 };
 
 export default reducers;

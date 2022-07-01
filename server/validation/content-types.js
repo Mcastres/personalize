@@ -4,7 +4,7 @@ const { yup, validateYupSchema } = require('@strapi/utils');
 
 const { get } = require('lodash/fp');
 
-const validateGetNonLocalizedAttributesSchema = yup
+const validateGetNonPersonalizedAttributesSchema = yup
   .object()
   .shape({
     model: yup.string().required(),
@@ -13,13 +13,13 @@ const validateGetNonLocalizedAttributesSchema = yup
       then: yup.strapiID().nullable(),
       otherwise: yup.strapiID().required(),
     }),
-    locale: yup.string().required(),
+    variation: yup.string().required(),
   })
   .noUnknown()
   .required();
 
 module.exports = {
-  validateGetNonLocalizedAttributesInput: validateYupSchema(
-    validateGetNonLocalizedAttributesSchema
+  validateGetNonPersonalizedAttributesInput: validateYupSchema(
+    validateGetNonPersonalizedAttributesSchema
   ),
 };

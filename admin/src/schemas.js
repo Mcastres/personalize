@@ -1,13 +1,13 @@
 import { object, string } from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 
-const localeFormSchema = object().shape({
+const variationFormSchema = object().shape({
   name: string()
-    .max(50, "Settings.locales.modal.locales.displayName.error")
+    .max(50, "Settings.variations.modal.variations.displayName.error")
     .required(errorsTrads.required),
   // slug: string()
-  //   .max(50, "Settings.locales.modal.locales.displayName.error")
+  //   .max(50, "Settings.variations.modal.variations.displayName.error")
   //   .required(errorsTrads.required),
 });
 
-export default localeFormSchema;
+export default variationFormSchema;

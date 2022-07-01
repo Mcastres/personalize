@@ -6,11 +6,11 @@ const extendCTBInitialDataMiddleware = () => {
       action.type === 'ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT' &&
       action.modalType === 'contentType'
     ) {
-      const i18n = { localized: false };
+      const personalization = { personalized: false };
 
       const pluginOptions = action.data.pluginOptions
-        ? { ...action.data.pluginOptions, i18n }
-        : { i18n };
+        ? { ...action.data.pluginOptions, personalization }
+        : { personalization };
 
       const data = { ...action.data, pluginOptions };
 
@@ -18,9 +18,9 @@ const extendCTBInitialDataMiddleware = () => {
         return next({ ...action, data });
       }
 
-      // Override the action if the pluginOption config does not contain i18n
+      // Override the action if the pluginOption config does not contain personalization
       // In this case we need to set the proper initialData shape
-      if (!has(action.data.pluginOptions, 'i18n.localized')) {
+      if (!has(action.data.pluginOptions, 'personalization.personalized')) {
         return next({ ...action, data });
       }
     }

@@ -1,12 +1,12 @@
 'use strict';
 
 const getCoreStore = () => {
-  return strapi.store({ type: 'plugin', name: 'i18n' });
+  return strapi.store({ type: 'plugin', name: 'personalization' });
 };
 
-// retrieve a local service
+// retrieve a variation service
 const getService = name => {
-  return strapi.plugin('i18n').service(name);
+  return strapi.plugin('personalization').service(name);
 };
 
 module.exports = {

@@ -1,26 +1,26 @@
 import React from 'react';
 import get from 'lodash/get';
-import I18N from '@strapi/icons/Earth';
+import Personalization from '@strapi/icons/Earth';
 import StrikedWorld from '@strapi/icons/EarthStriked';
 import LabelAction from '../components/LabelAction';
 import { getTrad } from '../utils';
 
-const enhanceRelationLayout = (layout, locale) =>
+const enhanceRelationLayout = (layout, variation) =>
   layout.map(current => {
     const labelActionProps = {
       title: {
-        id: getTrad('Field.localized'),
-        defaultMessage: 'This value is unique for the selected locale',
+        id: getTrad('Field.personalized'),
+        defaultMessage: 'This value is unique for the selected variation',
       },
-      icon: <I18N aria-hidden />,
+      icon: <Personalization aria-hidden />,
     };
     let queryInfos = current.queryInfos;
 
-    if (get(current, ['targetModelPluginOptions', 'i18n', 'localized'], false)) {
+    if (get(current, ['targetModelPluginOptions', 'personalization', 'personalized'], false)) {
       queryInfos = {
         ...queryInfos,
-        defaultParams: { ...queryInfos.defaultParams, locale },
-        paramsToKeep: ['plugins.i18n.locale'],
+        defaultParams: { ...queryInfos.defaultParams, variation },
+        paramsToKeep: ['plugins.personalization.variation'],
       };
     }
 
@@ -31,20 +31,20 @@ const enhanceEditLayout = layout =>
   layout.map(row => {
     const enhancedRow = row.reduce((acc, field) => {
       const type = get(field, ['fieldSchema', 'type'], null);
-      const hasI18nEnabled = get(
+      const hasPersonalizationEnabled = get(
         field,
-        ['fieldSchema', 'pluginOptions', 'i18n', 'localized'],
+        ['fieldSchema', 'pluginOptions', 'personalization', 'personalized'],
         type === 'uid'
       );
 
       const labelActionProps = {
         title: {
-          id: hasI18nEnabled ? getTrad('Field.localized') : getTrad('Field.not-localized'),
-          defaultMessage: hasI18nEnabled
-            ? 'This value is unique for the selected locale'
-            : 'This value is common to all locales',
+          id: hasPersonalizationEnabled ? getTrad('Field.personalized') : getTrad('Field.not-personalized'),
+          defaultMessage: hasPersonalizationEnabled
+            ? 'This value is unique for the selected variation'
+            : 'This value is common to all variations',
         },
-        icon: hasI18nEnabled ? <I18N aria-hidden /> : <StrikedWorld aria-hidden />,
+        icon: hasPersonalizationEnabled ? <Personalization aria-hidden /> : <StrikedWorld aria-hidden />,
       };
 
       acc.push({ ...field, labelAction: <LabelAction {...labelActionProps} /> });
@@ -55,13 +55,13 @@ const enhanceEditLayout = layout =>
     return enhancedRow;
   });
 
-const enhanceComponentsLayout = (components, locale) => {
+const enhanceComponentsLayout = (components, variation) => {
   return Object.keys(components).reduce((acc, current) => {
     const currentComponentLayout = components[current];
 
     const enhancedEditLayout = enhanceComponentLayoutForRelations(
       currentComponentLayout.layouts.edit,
-      locale
+      variation
     );
 
     acc[current] = {
@@ -73,17 +73,17 @@ const enhanceComponentsLayout = (components, locale) => {
   }, {});
 };
 
-const enhanceComponentLayoutForRelations = (layout, locale) =>
+const enhanceComponentLayoutForRelations = (layout, variation) =>
   layout.map(row => {
     const enhancedRow = row.reduce((acc, field) => {
       if (
         get(field, ['fieldSchema', 'type']) === 'relation' &&
-        get(field, ['targetModelPluginOptions', 'i18n', 'localized'], false)
+        get(field, ['targetModelPluginOptions', 'personalization', 'personalized'], false)
       ) {
         const queryInfos = {
           ...field.queryInfos,
-          defaultParams: { ...field.queryInfos.defaultParams, locale },
-          paramsToKeep: ['plugins.i18n.locale'],
+          defaultParams: { ...field.queryInfos.defaultParams, variation },
+          paramsToKeep: ['plugins.personalization.variation'],
         };
 
         acc.push({ ...field, queryInfos });
@@ -102,20 +102,20 @@ const enhanceComponentLayoutForRelations = (layout, locale) =>
 const getPathToContentType = pathArray => ['contentType', ...pathArray];
 
 const mutateEditViewLayoutHook = ({ layout, query }) => {
-  const hasI18nEnabled = get(
+  const hasPersonalizationEnabled = get(
     layout,
-    getPathToContentType(['pluginOptions', 'i18n', 'localized']),
+    getPathToContentType(['pluginOptions', 'personalization', 'personalized']),
     false
   );
 
-  if (!hasI18nEnabled) {
+  if (!hasPersonalizationEnabled) {
     return { layout, query };
   }
 
-  const currentLocale = get(query, ['plugins', 'i18n', 'locale'], null);
+  const currentVariation = get(query, ['plugins', 'personalization', 'variation'], null);
 
   // This might break the cm, has the user might be redirected to the homepage
-  if (!currentLocale) {
+  if (!currentVariation) {
     return { layout, query };
   }
 
@@ -123,7 +123,7 @@ const mutateEditViewLayoutHook = ({ layout, query }) => {
   const editRelationsPath = getPathToContentType(['layouts', 'editRelations']);
   const editLayout = get(layout, editLayoutPath);
   const editRelationsLayout = get(layout, editRelationsPath);
-  const nextEditRelationLayout = enhanceRelationLayout(editRelationsLayout, currentLocale);
+  const nextEditRelationLayout = enhanceRelationLayout(editRelationsLayout, currentVariation);
   const nextEditLayout = enhanceEditLayout(editLayout);
 
   const enhancedLayouts = {
@@ -132,7 +132,7 @@ const mutateEditViewLayoutHook = ({ layout, query }) => {
     edit: nextEditLayout,
   };
 
-  const components = enhanceComponentsLayout(layout.components, currentLocale);
+  const components = enhanceComponentsLayout(layout.components, currentVariation);
 
   const enhancedData = {
     query,

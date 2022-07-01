@@ -2,41 +2,41 @@
 
 const { ApplicationError } = require('@strapi/utils').errors;
 const {
-  isLocalizedContentType,
-  getValidLocale,
-  getNewLocalizationsFrom,
+  isPersonalizedContentType,
+  getValidVariation,
+  getNewPersonalizationsFrom,
   getAndValidateRelatedEntity,
-  getNonLocalizedAttributes,
-  copyNonLocalizedAttributes,
-  fillNonLocalizedAttributes,
-  getNestedPopulateOfNonLocalizedAttributes,
+  getNonPersonalizedAttributes,
+  copyNonPersonalizedAttributes,
+  fillNonPersonalizedAttributes,
+  getNestedPopulateOfNonPersonalizedAttributes,
 } = require('../content-types')();
 
 describe('content-types service', () => {
-  describe('isLocalizedContentType', () => {
+  describe('isPersonalizedContentType', () => {
     test('Checks for the i18N option', () => {
-      expect(isLocalizedContentType({ pluginOptions: { i18n: { localized: false } } })).toBe(false);
-      expect(isLocalizedContentType({ pluginOptions: { i18n: { localized: true } } })).toBe(true);
+      expect(isPersonalizedContentType({ pluginOptions: { personalization: { personalized: false } } })).toBe(false);
+      expect(isPersonalizedContentType({ pluginOptions: { personalization: { personalized: true } } })).toBe(true);
     });
 
     test('Defaults to false', () => {
-      expect(isLocalizedContentType({})).toBe(false);
-      expect(isLocalizedContentType({ pluginOptions: {} })).toBe(false);
-      expect(isLocalizedContentType({ pluginOptions: { i18n: {} } })).toBe(false);
+      expect(isPersonalizedContentType({})).toBe(false);
+      expect(isPersonalizedContentType({ pluginOptions: {} })).toBe(false);
+      expect(isPersonalizedContentType({ pluginOptions: { personalization: {} } })).toBe(false);
     });
   });
 
-  describe('getNonLocalizedAttributes', () => {
-    test('Uses the pluginOptions to detect non localized fields', () => {
+  describe('getNonPersonalizedAttributes', () => {
+    test('Uses the pluginOptions to detect non personalized fields', () => {
       expect(
-        getNonLocalizedAttributes({
+        getNonPersonalizedAttributes({
           uid: 'test-model',
           attributes: {
             title: {
               type: 'string',
               pluginOptions: {
-                i18n: {
-                  localized: true,
+                personalization: {
+                  personalized: true,
                 },
               },
             },
@@ -51,16 +51,16 @@ describe('content-types service', () => {
       ).toEqual(['stars', 'price']);
     });
 
-    test('Consider relations to be always localized', () => {
+    test('Consider relations to be always personalized', () => {
       expect(
-        getNonLocalizedAttributes({
+        getNonPersonalizedAttributes({
           uid: 'test-model',
           attributes: {
             title: {
               type: 'string',
               pluginOptions: {
-                i18n: {
-                  localized: true,
+                personalization: {
+                  personalized: true,
                 },
               },
             },
@@ -85,16 +85,16 @@ describe('content-types service', () => {
       ).toEqual(['stars', 'price']);
     });
 
-    test('Consider locale, localizations & publishedAt as localized', () => {
+    test('Consider variation, personalizations & publishedAt as personalized', () => {
       expect(
-        getNonLocalizedAttributes({
+        getNonPersonalizedAttributes({
           uid: 'test-model',
           attributes: {
             title: {
               type: 'string',
               pluginOptions: {
-                i18n: {
-                  localized: true,
+                personalization: {
+                  personalized: true,
                 },
               },
             },
@@ -104,11 +104,11 @@ describe('content-types service', () => {
             price: {
               type: 'integer',
             },
-            locale: {
+            variation: {
               type: 'string',
               visible: false,
             },
-            localizations: {
+            personalizations: {
               type: 'relation',
               relation: 'oneToMany',
               target: 'test-model',
@@ -123,9 +123,9 @@ describe('content-types service', () => {
       ).toEqual(['stars', 'price']);
     });
 
-    test('Consider uid to always be localized', () => {
+    test('Consider uid to always be personalized', () => {
       expect(
-        getNonLocalizedAttributes({
+        getNonPersonalizedAttributes({
           attributes: {
             price: {
               type: 'integer',
@@ -139,50 +139,50 @@ describe('content-types service', () => {
     });
   });
 
-  describe('getValidLocale', () => {
-    test('set default locale if the provided one is nil', async () => {
-      const getDefaultLocale = jest.fn(() => Promise.resolve('en'));
+  describe('getValidVariation', () => {
+    test('set default variation if the provided one is nil', async () => {
+      const getDefaultVariation = jest.fn(() => Promise.resolve('en'));
       global.strapi = {
         plugins: {
-          i18n: {
+          personalization: {
             services: {
-              locales: {
-                getDefaultLocale,
+              variations: {
+                getDefaultVariation,
               },
             },
           },
         },
       };
-      const locale = await getValidLocale(null);
+      const variation = await getValidVariation(null);
 
-      expect(locale).toBe('en');
+      expect(variation).toBe('en');
     });
 
-    test('set locale to the provided one if it exists', async () => {
+    test('set variation to the provided one if it exists', async () => {
       const findByCode = jest.fn(() => Promise.resolve('en'));
       global.strapi = {
         plugins: {
-          i18n: {
+          personalization: {
             services: {
-              locales: {
+              variations: {
                 findByCode,
               },
             },
           },
         },
       };
-      const locale = await getValidLocale('en');
+      const variation = await getValidVariation('en');
 
-      expect(locale).toBe('en');
+      expect(variation).toBe('en');
     });
 
-    test("throw if provided locale doesn't exist", async () => {
+    test("throw if provided variation doesn't exist", async () => {
       const findByCode = jest.fn(() => Promise.resolve(undefined));
       global.strapi = {
         plugins: {
-          i18n: {
+          personalization: {
             services: {
-              locales: {
+              variations: {
                 findByCode,
               },
             },
@@ -190,10 +190,10 @@ describe('content-types service', () => {
         },
       };
       try {
-        await getValidLocale('en');
+        await getValidVariation('en');
       } catch (e) {
         expect(e instanceof ApplicationError).toBe(true);
-        expect(e.message).toBe('Locale not found');
+        expect(e.message).toBe('Variation not found');
       }
 
       expect(findByCode).toHaveBeenCalledWith('en');
@@ -206,7 +206,7 @@ describe('content-types service', () => {
       const findOne = jest.fn(() => Promise.resolve(undefined));
       const relatedEntityId = 1;
       const model = 'api::country.country';
-      const locale = 'fr';
+      const variation = 'fr';
 
       global.strapi = {
         query: () => ({
@@ -216,7 +216,7 @@ describe('content-types service', () => {
       };
 
       try {
-        await getAndValidateRelatedEntity(relatedEntityId, model, locale);
+        await getAndValidateRelatedEntity(relatedEntityId, model, variation);
       } catch (e) {
         expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toBe("The related entity doesn't exist");
@@ -224,22 +224,22 @@ describe('content-types service', () => {
 
       expect(findOne).toHaveBeenCalledWith(
         kind === 'singleType'
-          ? { populate: ['localizations'] }
-          : { where: { id: relatedEntityId }, populate: ['localizations'] }
+          ? { populate: ['personalizations'] }
+          : { where: { id: relatedEntityId }, populate: ['personalizations'] }
       );
       expect.assertions(3);
     });
 
-    test('Throw if locale already exists (1/2)', async () => {
+    test('Throw if variation already exists (1/2)', async () => {
       const relatedEntityId = 1;
       const relatedEntity = {
         id: relatedEntityId,
-        locale: 'en',
-        localizations: [],
+        variation: 'en',
+        personalizations: [],
       };
       const findOne = jest.fn(() => Promise.resolve(relatedEntity));
       const model = 'api::country.country';
-      const locale = 'en';
+      const variation = 'en';
 
       global.strapi = {
         query: () => ({
@@ -249,35 +249,35 @@ describe('content-types service', () => {
       };
 
       try {
-        await getAndValidateRelatedEntity(relatedEntityId, model, locale);
+        await getAndValidateRelatedEntity(relatedEntityId, model, variation);
       } catch (e) {
         expect(e instanceof ApplicationError).toBe(true);
-        expect(e.message).toBe('The entity already exists in this locale');
+        expect(e.message).toBe('The entity already exists in this variation');
       }
 
       expect(findOne).toHaveBeenCalledWith(
         kind === 'singleType'
-          ? { populate: ['localizations'] }
-          : { where: { id: relatedEntityId }, populate: ['localizations'] }
+          ? { populate: ['personalizations'] }
+          : { where: { id: relatedEntityId }, populate: ['personalizations'] }
       );
       expect.assertions(3);
     });
 
-    test('Throw if locale already exists (2/2)', async () => {
+    test('Throw if variation already exists (2/2)', async () => {
       const relatedEntityId = 1;
       const relatedEntity = {
         id: relatedEntityId,
-        locale: 'fr',
-        localizations: [
+        variation: 'fr',
+        personalizations: [
           {
             id: 2,
-            locale: 'en',
+            variation: 'en',
           },
         ],
       };
       const findOne = jest.fn(() => Promise.resolve(relatedEntity));
       const model = 'api::country.country';
-      const locale = 'en';
+      const variation = 'en';
 
       global.strapi = {
         query: () => ({
@@ -287,16 +287,16 @@ describe('content-types service', () => {
       };
 
       try {
-        await getAndValidateRelatedEntity(relatedEntityId, model, locale);
+        await getAndValidateRelatedEntity(relatedEntityId, model, variation);
       } catch (e) {
         expect(e instanceof ApplicationError).toBe(true);
-        expect(e.message).toBe('The entity already exists in this locale');
+        expect(e.message).toBe('The entity already exists in this variation');
       }
 
       expect(findOne).toHaveBeenCalledWith(
         kind === 'singleType'
-          ? { populate: ['localizations'] }
-          : { where: { id: relatedEntityId }, populate: ['localizations'] }
+          ? { populate: ['personalizations'] }
+          : { where: { id: relatedEntityId }, populate: ['personalizations'] }
       );
       expect.assertions(3);
     });
@@ -305,17 +305,17 @@ describe('content-types service', () => {
       const relatedEntityId = 1;
       const relatedEntity = {
         id: relatedEntityId,
-        locale: 'fr',
-        localizations: [
+        variation: 'fr',
+        personalizations: [
           {
             id: 2,
-            locale: 'en',
+            variation: 'en',
           },
         ],
       };
       const findOne = jest.fn(() => Promise.resolve(relatedEntity));
       const model = 'api::country.country';
-      const locale = 'it';
+      const variation = 'it';
 
       global.strapi = {
         query: () => ({
@@ -324,55 +324,55 @@ describe('content-types service', () => {
         getModel: () => ({ kind }),
       };
 
-      const foundEntity = await getAndValidateRelatedEntity(relatedEntityId, model, locale);
+      const foundEntity = await getAndValidateRelatedEntity(relatedEntityId, model, variation);
 
       expect(foundEntity).toEqual(relatedEntity);
       expect(findOne).toHaveBeenCalledWith(
         kind === 'singleType'
-          ? { populate: ['localizations'] }
-          : { where: { id: relatedEntityId }, populate: ['localizations'] }
+          ? { populate: ['personalizations'] }
+          : { where: { id: relatedEntityId }, populate: ['personalizations'] }
       );
       expect.assertions(2);
     });
   });
 
-  describe('getNewLocalizationsFrom', () => {
-    test('Can get localizations', async () => {
+  describe('getNewPersonalizationsFrom', () => {
+    test('Can get personalizations', async () => {
       const relatedEntity = {
         id: 1,
-        locale: 'fr',
-        localizations: [
+        variation: 'fr',
+        personalizations: [
           {
             id: 2,
-            locale: 'en',
+            variation: 'en',
           },
           {
             id: 3,
-            locale: 'it',
+            variation: 'it',
           },
         ],
       };
 
-      const localizations = await getNewLocalizationsFrom(relatedEntity);
+      const personalizations = await getNewPersonalizationsFrom(relatedEntity);
 
-      expect(localizations).toEqual([1, 2, 3]);
+      expect(personalizations).toEqual([1, 2, 3]);
     });
 
-    test('Add empty localizations if none exist (CT)', async () => {
-      const localizations = await getNewLocalizationsFrom(undefined);
+    test('Add empty personalizations if none exist (CT)', async () => {
+      const personalizations = await getNewPersonalizationsFrom(undefined);
 
-      expect(localizations).toEqual([]);
+      expect(personalizations).toEqual([]);
     });
   });
 
-  describe('copyNonLocalizedAttributes', () => {
-    test('Does not copy locale, localizations & publishedAt', () => {
+  describe('copyNonPersonalizedAttributes', () => {
+    test('Does not copy variation, personalizations & publishedAt', () => {
       const model = {
         attributes: {
           title: {
             type: 'string',
             pluginOptions: {
-              i18n: { localized: true },
+              personalization: { personalized: true },
             },
           },
           price: {
@@ -384,11 +384,11 @@ describe('content-types service', () => {
           description: {
             type: 'string',
           },
-          locale: {
+          variation: {
             type: 'string',
             visible: false,
           },
-          localizations: {
+          personalizations: {
             collection: 'test-model',
             visible: false,
           },
@@ -405,25 +405,25 @@ describe('content-types service', () => {
         price: 25,
         relation: 1,
         description: 'My super description',
-        locale: 'en',
-        localizations: [1, 2, 3],
+        variation: 'en',
+        personalizations: [1, 2, 3],
         publishedAt: '2021-03-18T09:47:37.557Z',
       };
 
-      const result = copyNonLocalizedAttributes(model, input);
+      const result = copyNonPersonalizedAttributes(model, input);
       expect(result).toStrictEqual({
         price: input.price,
         description: input.description,
       });
     });
 
-    test('picks only non localized attributes', () => {
+    test('picks only non personalized attributes', () => {
       const model = {
         attributes: {
           title: {
             type: 'string',
             pluginOptions: {
-              i18n: { localized: true },
+              personalization: { personalized: true },
             },
           },
           price: {
@@ -446,7 +446,7 @@ describe('content-types service', () => {
         description: 'My super description',
       };
 
-      const result = copyNonLocalizedAttributes(model, input);
+      const result = copyNonPersonalizedAttributes(model, input);
       expect(result).toStrictEqual({
         price: input.price,
         description: input.description,
@@ -471,7 +471,7 @@ describe('content-types service', () => {
           title: {
             type: 'string',
             pluginOptions: {
-              i18n: { localized: true },
+              personalization: { personalized: true },
             },
           },
           price: {
@@ -498,7 +498,7 @@ describe('content-types service', () => {
         },
       };
 
-      const result = copyNonLocalizedAttributes(model, input);
+      const result = copyNonPersonalizedAttributes(model, input);
       expect(result).toEqual({
         price: 25,
         component: {
@@ -508,8 +508,8 @@ describe('content-types service', () => {
     });
   });
 
-  describe('fillNonLocalizedAttributes', () => {
-    test('fill non localized attributes', () => {
+  describe('fillNonPersonalizedAttributes', () => {
+    test('fill non personalized attributes', () => {
       const entry = {
         a: 'a',
         b: undefined,
@@ -543,18 +543,18 @@ describe('content-types service', () => {
           c: {},
           d: {},
           e: {},
-          la: { pluginOptions: { i18n: { localized: true } } },
-          lb: { pluginOptions: { i18n: { localized: true } } },
-          lc: { pluginOptions: { i18n: { localized: true } } },
-          ld: { pluginOptions: { i18n: { localized: true } } },
-          le: { pluginOptions: { i18n: { localized: true } } },
+          la: { pluginOptions: { personalization: { personalized: true } } },
+          lb: { pluginOptions: { personalization: { personalized: true } } },
+          lc: { pluginOptions: { personalization: { personalized: true } } },
+          ld: { pluginOptions: { personalization: { personalized: true } } },
+          le: { pluginOptions: { personalization: { personalized: true } } },
         },
       };
 
       const getModel = jest.fn(() => modelDef);
       global.strapi = { getModel };
 
-      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+      fillNonPersonalizedAttributes(entry, relatedEntry, { model: 'model' });
 
       expect(entry).toEqual({
         a: 'a',
@@ -571,7 +571,7 @@ describe('content-types service', () => {
     });
   });
 
-  describe('getNestedPopulateOfNonLocalizedAttributes', () => {
+  describe('getNestedPopulateOfNonPersonalizedAttributes', () => {
     beforeAll(() => {
       const getModel = model =>
         ({
@@ -580,11 +580,11 @@ describe('content-types service', () => {
               name: {
                 type: 'string',
               },
-              nonLocalizedName: {
+              nonPersonalizedName: {
                 type: 'string',
                 pluginOptions: {
-                  i18n: {
-                    localized: false,
+                  personalization: {
+                    personalized: false,
                   },
                 },
               },
@@ -593,8 +593,8 @@ describe('content-types service', () => {
                 repeatable: false,
                 component: 'basic.mycompo',
                 pluginOptions: {
-                  i18n: {
-                    localized: false,
+                  personalization: {
+                    personalized: false,
                   },
                 },
               },
@@ -602,8 +602,8 @@ describe('content-types service', () => {
                 type: 'dynamiczone',
                 components: ['basic.mycompo', 'default.mydz'],
                 pluginOptions: {
-                  i18n: {
-                    localized: false,
+                  personalization: {
+                    personalized: false,
                   },
                 },
               },
@@ -643,7 +643,7 @@ describe('content-types service', () => {
     });
 
     test('Populate component, dz and media and not relations', () => {
-      const result = getNestedPopulateOfNonLocalizedAttributes('api::country.country');
+      const result = getNestedPopulateOfNonPersonalizedAttributes('api::country.country');
 
       expect(result).toEqual(['comp', 'dz', 'comp.image', 'dz.image', 'dz.picture']);
     });

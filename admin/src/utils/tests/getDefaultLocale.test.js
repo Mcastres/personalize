@@ -1,8 +1,8 @@
-import getDefaultLocale from '../getDefaultLocale';
+import getDefaultVariation from '../getDefaultVariation';
 
-describe('getDefaultLocale', () => {
-  it('gives fr-FR when it s the default locale and that it has read access to it', () => {
-    const locales = [
+describe('getDefaultVariation', () => {
+  it('gives fr-FR when it s the default variation and that it has read access to it', () => {
+    const variations = [
       {
         id: 1,
         name: 'English',
@@ -38,7 +38,7 @@ describe('getDefaultLocale', () => {
               'json',
               'slug',
             ],
-            locales: [],
+            variations: [],
           },
           conditions: [],
         },
@@ -50,7 +50,7 @@ describe('getDefaultLocale', () => {
           subject: 'api::address.address',
           properties: {
             fields: [],
-            locales: ['en', 'fr-FR'],
+            variations: ['en', 'fr-FR'],
           },
           conditions: [],
         },
@@ -58,13 +58,13 @@ describe('getDefaultLocale', () => {
     };
 
     const expected = 'fr-FR';
-    const actual = getDefaultLocale(ctPermissions, locales);
+    const actual = getDefaultVariation(ctPermissions, variations);
 
     expect(actual).toEqual(expected);
   });
 
-  it('gives fr-FR when it s the default locale and that it has create access to it', () => {
-    const locales = [
+  it('gives fr-FR when it s the default variation and that it has create access to it', () => {
+    const variations = [
       {
         id: 1,
         name: 'English',
@@ -100,7 +100,7 @@ describe('getDefaultLocale', () => {
               'json',
               'slug',
             ],
-            locales: ['fr-FR'],
+            variations: ['fr-FR'],
           },
           conditions: [],
         },
@@ -112,7 +112,7 @@ describe('getDefaultLocale', () => {
           subject: 'api::address.address',
           properties: {
             fields: [],
-            locales: ['en'],
+            variations: ['en'],
           },
           conditions: [],
         },
@@ -120,13 +120,13 @@ describe('getDefaultLocale', () => {
     };
 
     const expected = 'fr-FR';
-    const actual = getDefaultLocale(ctPermissions, locales);
+    const actual = getDefaultVariation(ctPermissions, variations);
 
     expect(actual).toEqual(expected);
   });
 
-  it('gives gives the first locale with read permission ("en") when the locale is allowed', () => {
-    const locales = [
+  it('gives gives the first variation with read permission ("en") when the locale is allowed', () => {
+    const variations = [
       {
         id: 1,
         name: 'English',
@@ -170,7 +170,7 @@ describe('getDefaultLocale', () => {
               'json',
               'slug',
             ],
-            locales: [],
+            variations: [],
           },
           conditions: [],
         },
@@ -182,7 +182,7 @@ describe('getDefaultLocale', () => {
           subject: 'api::address.address',
           properties: {
             fields: [],
-            locales: ['en', 'de'],
+            variations: ['en', 'de'],
           },
           conditions: [],
         },
@@ -190,13 +190,13 @@ describe('getDefaultLocale', () => {
     };
 
     const expected = 'en';
-    const actual = getDefaultLocale(ctPermissions, locales);
+    const actual = getDefaultVariation(ctPermissions, variations);
 
     expect(actual).toEqual(expected);
   });
 
-  it('gives gives the first locale with create permission ("en") when the locale is allowed', () => {
-    const locales = [
+  it('gives gives the first variation with create permission ("en") when the locale is allowed', () => {
+    const variations = [
       {
         id: 1,
         name: 'English',
@@ -240,7 +240,7 @@ describe('getDefaultLocale', () => {
               'json',
               'slug',
             ],
-            locales: ['en', 'de'],
+            variations: ['en', 'de'],
           },
           conditions: [],
         },
@@ -252,7 +252,7 @@ describe('getDefaultLocale', () => {
           subject: 'api::address.address',
           properties: {
             fields: [],
-            locales: [],
+            variations: [],
           },
           conditions: [],
         },
@@ -260,13 +260,13 @@ describe('getDefaultLocale', () => {
     };
 
     const expected = 'en';
-    const actual = getDefaultLocale(ctPermissions, locales);
+    const actual = getDefaultVariation(ctPermissions, variations);
 
     expect(actual).toEqual(expected);
   });
 
-  it('gives null when the user has no permission on any locale', () => {
-    const locales = [
+  it('gives null when the user has no permission on any variation', () => {
+    const variations = [
       {
         id: 1,
         name: 'English',
@@ -310,7 +310,7 @@ describe('getDefaultLocale', () => {
               'json',
               'slug',
             ],
-            locales: [],
+            variations: [],
           },
           conditions: [],
         },
@@ -322,7 +322,7 @@ describe('getDefaultLocale', () => {
           subject: 'api::address.address',
           properties: {
             fields: [],
-            locales: [],
+            variations: [],
           },
           conditions: [],
         },
@@ -330,7 +330,7 @@ describe('getDefaultLocale', () => {
     };
 
     const expected = null;
-    const actual = getDefaultLocale(ctPermissions, locales);
+    const actual = getDefaultVariation(ctPermissions, variations);
 
     expect(actual).toEqual(expected);
   });

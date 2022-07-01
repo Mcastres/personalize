@@ -4,23 +4,23 @@ const { reduce } = require('lodash/fp');
 const { getService } = require('../utils');
 
 const sendDidInitializeEvent = async () => {
-  const { isLocalizedContentType } = getService('content-types');
+  const { isPersonalizedContentType } = getService('content-types');
 
   const numberOfContentTypes = reduce(
-    (sum, contentType) => (isLocalizedContentType(contentType) ? sum + 1 : sum),
+    (sum, contentType) => (isPersonalizedContentType(contentType) ? sum + 1 : sum),
     0
   )(strapi.contentTypes);
 
-  await strapi.telemetry.send('didInitializeI18n', { numberOfContentTypes });
+  await strapi.telemetry.send('didInitializePersonalization', { numberOfContentTypes });
 };
 
-const sendDidUpdateI18nLocalesEvent = async () => {
-  const numberOfLocales = await getService('locales').count();
+const sendDidUpdatePersonalizationVariationsEvent = async () => {
+  const numberOfVariations = await getService('variations').count();
 
-  await strapi.telemetry.send('didUpdateI18nLocales', { numberOfLocales });
+  await strapi.telemetry.send('didUpdatePersonalizationVariations', { numberOfVariation });
 };
 
 module.exports = () => ({
   sendDidInitializeEvent,
-  sendDidUpdateI18nLocalesEvent,
+  sendDidUpdatePersonalizationVariationsEvent,
 });

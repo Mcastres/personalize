@@ -11,23 +11,23 @@ const {
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
-const hasLocalizedOption = modelOrAttribute => {
-  return prop('pluginOptions.i18n.localized', modelOrAttribute) === true;
+const hasPersonalizedOption = modelOrAttribute => {
+  return prop('pluginOptions.personalization.personalized', modelOrAttribute) === true;
 };
 
-const getValidLocale = async locale => {
-  const localesService = getService('locales');
+const getValidVariation = async variation => {
+  const variationsService = getService('variations');
 
-  if (isNil(locale)) {
-    return localesService.getDefaultLocale();
+  if (isNil(variation)) {
+    return variationsService.getDefaultVariation();
   }
 
-  const foundLocale = await localesService.findBySlug(locale);
-  if (!foundLocale) {
-    throw new ApplicationError('Locale not found');
+  const foundVariation = await variationsService.findBySlug(variation);
+  if (!foundVariation) {
+    throw new ApplicationError('Variation not found');
   }
 
-  return locale;
+  return variation;
 };
 
 /**
@@ -35,9 +35,9 @@ const getValidLocale = async locale => {
  * @param {Object} relatedEntity related entity
  * @returns {id[]} related entity
  */
-const getNewLocalizationsFrom = async relatedEntity => {
+const getNewPersonalizationsFrom = async relatedEntity => {
   if (relatedEntity) {
-    return [relatedEntity.id, ...relatedEntity.localizations.map(prop('id'))];
+    return [relatedEntity.id, ...relatedEntity.personalizations.map(prop('id'))];
   }
 
   return [];
@@ -47,19 +47,19 @@ const getNewLocalizationsFrom = async relatedEntity => {
  * Get the related entity used for entity creation
  * @param {id} relatedEntityId related entity id
  * @param {string} model corresponding model
- * @param {string} locale locale of the entity to create
+ * @param {string} variation variation of the entity to create
  * @returns {Object} related entity
  */
-const getAndValidateRelatedEntity = async (relatedEntityId, model, locale) => {
+const getAndValidateRelatedEntity = async (relatedEntityId, model, variation) => {
   const { kind } = strapi.getModel(model);
   let relatedEntity;
 
   if (kind === 'singleType') {
-    relatedEntity = await strapi.query(model).findOne({ populate: ['localizations'] });
+    relatedEntity = await strapi.query(model).findOne({ populate: ['personalizations'] });
   } else if (relatedEntityId) {
     relatedEntity = await strapi
       .query(model)
-      .findOne({ where: { id: relatedEntityId }, populate: ['localizations'] });
+      .findOne({ where: { id: relatedEntityId }, populate: ['personalizations'] });
   }
 
   if (relatedEntityId && !relatedEntity) {
@@ -68,45 +68,45 @@ const getAndValidateRelatedEntity = async (relatedEntityId, model, locale) => {
 
   if (
     relatedEntity &&
-    (relatedEntity.locale === locale ||
-      relatedEntity.localizations.map(prop('locale')).includes(locale))
+    (relatedEntity.variation === variation ||
+      relatedEntity.personalizations.map(prop('variation')).includes(variation))
   ) {
-    throw new ApplicationError('The entity already exists in this locale');
+    throw new ApplicationError('The entity already exists in this variation');
   }
 
   return relatedEntity;
 };
 
 /**
- * Returns whether an attribute is localized or not
+ * Returns whether an attribute is personalized or not
  * @param {*} attribute
  * @returns
  */
-const isLocalizedAttribute = attribute => {
+const isPersonalizedAttribute = attribute => {
   return (
-    hasLocalizedOption(attribute) ||
+    hasPersonalizedOption(attribute) ||
     isRelationalAttribute(attribute) ||
     isTypedAttribute(attribute, 'uid')
   );
 };
 
 /**
- * Returns whether a model is localized or not
+ * Returns whether a model is personalized or not
  * @param {*} model
  * @returns
  */
-const isLocalizedContentType = model => {
-  return hasLocalizedOption(model);
+const isPersonalizedContentType = model => {
+  return hasPersonalizedOption(model);
 };
 
 /**
- * Returns the list of attribute names that are not localized
+ * Returns the list of attribute names that are not personalized
  * @param {object} model
  * @returns {string[]}
  */
-const getNonLocalizedAttributes = model => {
+const getNonPersonalizedAttributes = model => {
   return getVisibleAttributes(model).filter(
-    attrName => !isLocalizedAttribute(model.attributes[attrName])
+    attrName => !isPersonalizedAttribute(model.attributes[attrName])
   );
 };
 
@@ -148,42 +148,42 @@ const removeIdsMut = (model, entry) => {
 };
 
 /**
- * Returns a copy of an entry picking only its non localized attributes
+ * Returns a copy of an entry picking only its non personalized attributes
  * @param {object} model
  * @param {object} entry
  * @returns {object}
  */
-const copyNonLocalizedAttributes = (model, entry) => {
-  const nonLocalizedAttributes = getNonLocalizedAttributes(model);
+const copyNonPersonalizedAttributes = (model, entry) => {
+  const nonPersonalizedAttributes = getNonPersonalizedAttributes(model);
 
-  return pipe(pick(nonLocalizedAttributes), removeIds(model))(entry);
+  return pipe(pick(nonPersonalizedAttributes), removeIds(model))(entry);
 };
 
 /**
- * Returns the list of attribute names that are localized
+ * Returns the list of attribute names that are personalized
  * @param {object} model
  * @returns {string[]}
  */
-const getLocalizedAttributes = model => {
+const getPersonalizedAttributes = model => {
   return getVisibleAttributes(model).filter(attrName =>
-    isLocalizedAttribute(model.attributes[attrName])
+    isPersonalizedAttribute(model.attributes[attrName])
   );
 };
 
 /**
- * Fill non localized fields of an entry if there are nil
+ * Fill non personalized fields of an entry if there are nil
  * @param {Object} entry entry to fill
  * @param {Object} relatedEntry values used to fill
  * @param {Object} options
  * @param {Object} options.model corresponding model
  */
-const fillNonLocalizedAttributes = (entry, relatedEntry, { model }) => {
+const fillNonPersonalizedAttributes = (entry, relatedEntry, { model }) => {
   if (isNil(relatedEntry)) {
     return;
   }
 
   const modelDef = strapi.getModel(model);
-  const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry);
+  const relatedEntryCopy = copyNonPersonalizedAttributes(modelDef, relatedEntry);
 
   _.forEach(relatedEntryCopy, (value, field) => {
     if (isNil(entry[field])) {
@@ -196,23 +196,23 @@ const fillNonLocalizedAttributes = (entry, relatedEntry, { model }) => {
  * build the populate param to
  * @param {String} modelUID uid of the model, could be of a content-type or a component
  */
-const getNestedPopulateOfNonLocalizedAttributes = modelUID => {
+const getNestedPopulateOfNonPersonalizedAttributes = modelUID => {
   const schema = strapi.getModel(modelUID);
   const scalarAttributes = getScalarAttributes(schema);
-  const nonLocalizedAttributes = getNonLocalizedAttributes(schema);
-  const currentAttributesToPopulate = difference(nonLocalizedAttributes, scalarAttributes);
+  const nonPersonalizedAttributes = getNonPersonalizedAttributes(schema);
+  const currentAttributesToPopulate = difference(nonPersonalizedAttributes, scalarAttributes);
   const attributesToPopulate = [...currentAttributesToPopulate];
 
   for (let attrName of currentAttributesToPopulate) {
     const attr = schema.attributes[attrName];
     if (attr.type === 'component') {
-      const nestedPopulate = getNestedPopulateOfNonLocalizedAttributes(attr.component).map(
+      const nestedPopulate = getNestedPopulateOfNonPersonalizedAttributes(attr.component).map(
         nestedAttr => `${attrName}.${nestedAttr}`
       );
       attributesToPopulate.push(...nestedPopulate);
     } else if (attr.type === 'dynamiczone') {
       attr.components.forEach(componentName => {
-        const nestedPopulate = getNestedPopulateOfNonLocalizedAttributes(componentName).map(
+        const nestedPopulate = getNestedPopulateOfNonPersonalizedAttributes(componentName).map(
           nestedAttr => `${attrName}.${nestedAttr}`
         );
         attributesToPopulate.push(...nestedPopulate);
@@ -224,13 +224,13 @@ const getNestedPopulateOfNonLocalizedAttributes = modelUID => {
 };
 
 module.exports = () => ({
-  isLocalizedContentType,
-  getValidLocale,
-  getNewLocalizationsFrom,
-  getLocalizedAttributes,
-  getNonLocalizedAttributes,
-  copyNonLocalizedAttributes,
+  isPersonalizedContentType,
+  getValidVariation,
+  getNewPersonalizationsFrom,
+  getPersonalizedAttributes,
+  getNonPersonalizedAttributes,
+  copyNonPersonalizedAttributes,
   getAndValidateRelatedEntity,
-  fillNonLocalizedAttributes,
-  getNestedPopulateOfNonLocalizedAttributes,
+  fillNonPersonalizedAttributes,
+  getNestedPopulateOfNonPersonalizedAttributes,
 });

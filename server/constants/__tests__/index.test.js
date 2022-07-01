@@ -1,27 +1,27 @@
 'use strict';
 
-const { getInitLocale } = require('../');
+const { getInitVariation } = require('../');
 
-describe('I18N default locale', () => {
-  describe('getInitLocale', () => {
-    test('The init locale is english by default', () => {
-      expect(getInitLocale()).toStrictEqual({
+describe('Personalization default variation', () => {
+  describe('getInitVariation', () => {
+    test('The init variation is english by default', () => {
+      expect(getInitVariation()).toStrictEqual({
         code: 'en',
         name: 'English (en)',
       });
     });
 
-    test('The init locale can be configured by an env var', () => {
-      process.env.STRAPI_PLUGIN_I18N_INIT_LOCALE_CODE = 'fr';
-      expect(getInitLocale()).toStrictEqual({
+    test('The init variation can be configured by an env var', () => {
+      process.env.STRAPI_PLUGIN_Personalization_INIT_VARIATION_CODE = 'fr';
+      expect(getInitVariation()).toStrictEqual({
         code: 'fr',
         name: 'French (fr)',
       });
     });
 
     test('Throws if env var code is unknown in iso list', () => {
-      process.env.STRAPI_PLUGIN_I18N_INIT_LOCALE_CODE = 'zzzzz';
-      expect(() => getInitLocale()).toThrow();
+      process.env.STRAPI_PLUGIN_Personalization_INIT_VARIATION_CODE = 'zzzzz';
+      expect(() => getInitVariation()).toThrow();
     });
   });
 });

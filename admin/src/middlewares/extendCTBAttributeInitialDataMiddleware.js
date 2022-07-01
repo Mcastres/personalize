@@ -8,7 +8,7 @@ const extendCTBAttributeInitialDataMiddleware = () => {
       try {
         const store = getState();
 
-        const hasi18nEnabled = get(
+        const haspersonalizationEnabled = get(
           store,
           [
             'content-type-builder_dataManagerProvider',
@@ -16,16 +16,16 @@ const extendCTBAttributeInitialDataMiddleware = () => {
             'contentType',
             'schema',
             'pluginOptions',
-            'i18n',
-            'localized',
+            'personalization',
+            'personalized',
           ],
           false
         );
 
-        if (hasi18nEnabled) {
+        if (haspersonalizationEnabled) {
           const pluginOptions = action.options
-            ? { ...action.options.pluginOptions, i18n: { localized: true } }
-            : { i18n: { localized: true } };
+            ? { ...action.options.pluginOptions, personalization: { personalized: true } }
+            : { personalization: { personalized: true } };
 
           return next({
             ...action,

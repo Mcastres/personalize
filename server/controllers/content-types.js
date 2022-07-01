@@ -4,41 +4,41 @@ const { pick, uniq, prop, getOr, flatten, pipe, map } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
-const { validateGetNonLocalizedAttributesInput } = require('../validation/content-types');
+const { validateGetNonPersonalizedAttributesInput } = require('../validation/content-types');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
-const getLocalesProperty = getOr([], 'properties.locales');
+const getVariationsProperty = getOr([], 'properties.variations');
 const getFieldsProperty = prop('properties.fields');
 
 const getFirstLevelPath = map(path => path.split('.')[0]);
 
 module.exports = {
-  async getNonLocalizedAttributes(ctx) {
+  async getNonPersonalizedAttributes(ctx) {
     const { user } = ctx.state;
-    const { model, id, locale } = ctx.request.body;
+    const { model, id, variation } = ctx.request.body;
 
-    await validateGetNonLocalizedAttributesInput({ model, id, locale });
+    await validateGetNonPersonalizedAttributesInput({ model, id, variation });
 
     const {
-      copyNonLocalizedAttributes,
-      isLocalizedContentType,
-      getNestedPopulateOfNonLocalizedAttributes,
+      copyNonPersonalizedAttributes,
+      isPersonalizedContentType,
+      getNestedPopulateOfNonPersonalizedAttributes,
     } = getService('content-types');
     const { READ_ACTION, CREATE_ACTION } = strapi.admin.services.constants;
 
     const modelDef = strapi.contentType(model);
-    const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(model);
+    const attributesToPopulate = getNestedPopulateOfNonPersonalizedAttributes(model);
 
-    if (!isLocalizedContentType(modelDef)) {
-      throw new ApplicationError('model.not.localized');
+    if (!isPersonalizedContentType(modelDef)) {
+      throw new ApplicationError('model.not.personalized');
     }
 
     let params = modelDef.kind === 'singleType' ? {} : { id };
 
     const entity = await strapi
       .query(model)
-      .findOne({ where: params, populate: [...attributesToPopulate, 'localizations'] });
+      .findOne({ where: params, populate: [...attributesToPopulate, 'personalizations'] });
 
     if (!entity) {
       return ctx.notFound();
@@ -54,19 +54,22 @@ module.exports = {
       },
     });
 
-    const localePermissions = permissions
-      .filter(perm => getLocalesProperty(perm).includes(locale))
+    const variationPermissions = permissions
+      .filter(perm => getVariationsProperty(perm).includes(variation))
       .map(getFieldsProperty);
 
-    const permittedFields = pipe(flatten, getFirstLevelPath, uniq)(localePermissions);
+    const permittedFields = pipe(flatten, getFirstLevelPath, uniq)(variationPermissions);
 
-    const nonLocalizedFields = copyNonLocalizedAttributes(modelDef, entity);
-    const sanitizedNonLocalizedFields = pick(permittedFields, nonLocalizedFields);
+    const nonPersonalizedFields = copyNonPersonalizedAttributes(modelDef, entity);
+    const sanitizedNonPersonalizedFields = pick(
+      permittedFields,
+      nonPersonalizedFields
+    );
 
     ctx.body = {
-      nonLocalizedFields: sanitizedNonLocalizedFields,
-      localizations: entity.localizations.concat(
-        pick(['id', 'locale', PUBLISHED_AT_ATTRIBUTE], entity)
+      nonPersonalizedFields: sanitizedNonPersonalizedFields,
+      personalizations: entity.personalizations.concat(
+        pick(["id", "variation", PUBLISHED_AT_ATTRIBUTE], entity)
       ),
     };
   },

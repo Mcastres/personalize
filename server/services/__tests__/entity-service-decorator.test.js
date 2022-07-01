@@ -1,49 +1,49 @@
 'use strict';
 
-jest.mock('../localizations', () => {
+jest.mock('../personalizations', () => {
   return () => ({
-    syncLocalizations: jest.fn(async () => {}),
-    syncNonLocalizedAttributes: jest.fn(async () => {}),
+    syncPersonalizations: jest.fn(async () => {}),
+    syncNonPersonalizedAttributes: jest.fn(async () => {}),
   });
 });
 
 const { decorator } = require('../entity-service-decorator')();
-const localizations = require('../localizations')();
-const locales = require('../locales')();
+const personalizations = require('../localizations')();
+const variations = require('../variations')();
 const contentTypes = require('../content-types')();
 
-const { syncLocalizations, syncNonLocalizedAttributes } = localizations;
+const { syncPersonalizations, syncNonPersonalizedAttributes } = personalizations;
 
 const model = {
   pluginOptions: {
-    i18n: {
-      localized: true,
+    personalization: {
+      personalized: true,
     },
   },
 };
 
-const nonLocalizedModel = {
+const nonPersonalizedModel = {
   pluginOptions: {
-    i18n: {
-      localized: false,
+    personalization: {
+      personalized: false,
     },
   },
 };
 
 const models = {
   'test-model': model,
-  'non-localized-model': nonLocalizedModel,
+  'non-personalized-model': nonPersonalizedModel,
 };
 
 describe('Entity service decorator', () => {
   beforeAll(() => {
     global.strapi = {
       plugins: {
-        i18n: {
+        personalization: {
           services: {
-            locales,
+            variations,
             'content-types': contentTypes,
-            localizations,
+            personalizations,
           },
         },
       },
@@ -61,8 +61,8 @@ describe('Entity service decorator', () => {
   });
 
   beforeEach(() => {
-    syncLocalizations.mockClear();
-    syncNonLocalizedAttributes.mockClear();
+    syncPersonalizations.mockClear();
+    syncNonPersonalizedAttributes.mockClear();
   });
 
   describe('wrapParams', () => {
@@ -79,14 +79,14 @@ describe('Entity service decorator', () => {
       expect(defaultService.wrapParams).toHaveBeenCalledWith(input, { uid: 'test-model' });
     });
 
-    test('Does not wrap options if model is not localized', async () => {
+    test('Does not wrap options if model is not personalized', async () => {
       const defaultService = {
         wrapParams: jest.fn(opts => Promise.resolve(opts)),
       };
       const service = decorator(defaultService);
 
       const input = { populate: ['test'] };
-      const output = await service.wrapParams(input, { uid: 'non-localized-model' });
+      const output = await service.wrapParams(input, { uid: 'non-personalized-model' });
 
       expect(output).toStrictEqual(input);
     });
@@ -103,7 +103,7 @@ describe('Entity service decorator', () => {
       expect(output.populate).toStrictEqual(input.populate);
     });
 
-    test('Adds locale param', async () => {
+    test('Adds variation param', async () => {
       const defaultService = {
         wrapParams: jest.fn(opts => Promise.resolve(opts)),
       };
@@ -112,7 +112,7 @@ describe('Entity service decorator', () => {
       const input = { populate: ['test'] };
       const output = await service.wrapParams(input, { uid: 'test-model' });
 
-      expect(output).toMatchObject({ filters: { $and: [{ locale: 'en' }] } });
+      expect(output).toMatchObject({ filters: { $and: [{ variation: 'en' }] } });
     });
 
     const testData = [
@@ -127,7 +127,7 @@ describe('Entity service decorator', () => {
     ];
 
     test.each(testData)(
-      "Doesn't add locale param when the params contain id or id_in - %s",
+      "Doesn't add variation param when the params contain id or id_in - %s",
       async (action, params) => {
         const defaultService = {
           wrapParams: jest.fn(opts => Promise.resolve(opts)),
@@ -141,19 +141,19 @@ describe('Entity service decorator', () => {
       }
     );
 
-    test('Replaces locale param', async () => {
+    test('Replaces variation param', async () => {
       const defaultService = {
         wrapParams: jest.fn(opts => Promise.resolve(opts)),
       };
       const service = decorator(defaultService);
 
       const input = {
-        locale: 'fr',
+        variation: 'fr',
         populate: ['test'],
       };
       const output = await service.wrapParams(input, { uid: 'test-model' });
 
-      expect(output).toMatchObject({ filters: { $and: [{ locale: 'fr' }] } });
+      expect(output).toMatchObject({ filters: { $and: [{ variation: 'fr' }] } });
     });
   });
 
@@ -175,10 +175,10 @@ describe('Entity service decorator', () => {
       expect(defaultService.create).toHaveBeenCalledWith('test-model', input);
     });
 
-    test('Calls syncLocalizations if model is localized', async () => {
+    test('Calls syncPersonalizations if model is personalized', async () => {
       const entry = {
         id: 1,
-        localizations: [{ id: 2 }],
+        personalizations: [{ id: 2 }],
       };
 
       const defaultService = {
@@ -191,13 +191,13 @@ describe('Entity service decorator', () => {
       await service.create('test-model', input);
 
       expect(defaultService.create).toHaveBeenCalledWith('test-model', input);
-      expect(syncLocalizations).toHaveBeenCalledWith(entry, { model });
+      expect(syncPersonalizations).toHaveBeenCalledWith(entry, { model });
     });
 
-    test('Skip processing if model is not localized', async () => {
+    test('Skip processing if model is not personalized', async () => {
       const entry = {
         id: 1,
-        localizations: [{ id: 2 }],
+        personalizations: [{ id: 2 }],
       };
 
       const defaultService = {
@@ -207,10 +207,10 @@ describe('Entity service decorator', () => {
       const service = decorator(defaultService);
 
       const input = { data: { title: 'title ' } };
-      const output = await service.create('non-localized-model', input);
+      const output = await service.create('non-personalized-model', input);
 
-      expect(defaultService.create).toHaveBeenCalledWith('non-localized-model', input);
-      expect(syncLocalizations).not.toHaveBeenCalled();
+      expect(defaultService.create).toHaveBeenCalledWith('non-personalized-model', input);
+      expect(syncPersonalizations).not.toHaveBeenCalled();
       expect(output).toStrictEqual(entry);
     });
   });
@@ -233,10 +233,10 @@ describe('Entity service decorator', () => {
       expect(defaultService.update).toHaveBeenCalledWith('test-model', 1, input);
     });
 
-    test('Calls syncNonLocalizedAttributes if model is localized', async () => {
+    test('Calls syncNonPersonalizedAttributes if model is personalized', async () => {
       const entry = {
         id: 1,
-        localizations: [{ id: 2 }],
+        personalizations: [{ id: 2 }],
       };
 
       const defaultService = {
@@ -249,14 +249,14 @@ describe('Entity service decorator', () => {
       const output = await service.update('test-model', 1, input);
 
       expect(defaultService.update).toHaveBeenCalledWith('test-model', 1, input);
-      expect(syncNonLocalizedAttributes).toHaveBeenCalledWith(entry, { model });
+      expect(syncNonPersonalizedAttributes).toHaveBeenCalledWith(entry, { model });
       expect(output).toStrictEqual(entry);
     });
 
-    test('Skip processing if model is not localized', async () => {
+    test('Skip processing if model is not personalized', async () => {
       const entry = {
         id: 1,
-        localizations: [{ id: 2 }],
+        personalizations: [{ id: 2 }],
       };
 
       const defaultService = {
@@ -266,10 +266,10 @@ describe('Entity service decorator', () => {
       const service = decorator(defaultService);
 
       const input = { data: { title: 'title ' } };
-      await service.update('non-localized-model', 1, input);
+      await service.update('non-personalized-model', 1, input);
 
-      expect(defaultService.update).toHaveBeenCalledWith('non-localized-model', 1, input);
-      expect(syncNonLocalizedAttributes).not.toHaveBeenCalled();
+      expect(defaultService.update).toHaveBeenCalledWith('non-personalized-model', 1, input);
+      expect(syncNonPersonalizedAttributes).not.toHaveBeenCalled();
     });
   });
 });

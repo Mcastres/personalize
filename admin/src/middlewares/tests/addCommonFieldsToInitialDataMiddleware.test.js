@@ -3,14 +3,14 @@ import addCommonFieldsToInitialDataMiddleware from '../addCommonFieldsToInitialD
 
 jest.mock('@strapi/helper-plugin', () => ({
   request: () => ({
-    nonLocalizedFields: { common: 'test' },
-    localizations: ['test'],
+    nonPersonalizedFields: { common: 'test' },
+    personalizations: ['test'],
   }),
   formatContentTypeData: data => data,
   contentManagementUtilRemoveFieldsFromData: data => data,
 }));
 
-describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
+describe('personalization | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
   let getState;
   const dispatch = jest.fn();
 
@@ -62,7 +62,7 @@ describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
   it('should forward the action when the relatedEntityId is not defined', () => {
     const action = {
       type: 'ContentManager/CrudReducer/INIT_FORM',
-      rawQuery: '?plugins[i18n][locale]=en',
+      rawQuery: '?plugins[personalization][variation]=en',
     };
 
     const next = jest.fn();
@@ -76,7 +76,7 @@ describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
   it('should makes a request to retrieve the common field when the relatedEntityId is defined', async () => {
     const action = {
       type: 'ContentManager/CrudReducer/INIT_FORM',
-      rawQuery: '?plugins[i18n][relatedEntityId]=1',
+      rawQuery: '?plugins[personalization][relatedEntityId]=1',
     };
 
     const next = jest.fn(x => x);
@@ -88,10 +88,10 @@ describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
 
     expect(nextAction).toEqual({
       type: 'ContentManager/CrudReducer/INIT_FORM',
-      rawQuery: '?plugins[i18n][relatedEntityId]=1',
+      rawQuery: '?plugins[personalization][relatedEntityId]=1',
       data: {
         name: 'test',
-        localizations: ['test'],
+        personalizations: ['test'],
         common: 'test',
       },
     });

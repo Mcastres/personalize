@@ -7,19 +7,19 @@
 import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import pluginId from '../../pluginId';
-import useLocales from '../../hooks/useLocales';
+import useVariations from '../../hooks/useVariations';
 
 const Initializer = ({ setPlugin }) => {
-  const { isLoading, locales } = useLocales();
+  const { isLoading, variations } = useVariations();
   const ref = useRef();
 
   ref.current = setPlugin;
 
   useEffect(() => {
-    if (!isLoading && locales.length > 0) {
+    if (!isLoading && variations.length > 0) {
       ref.current(pluginId);
     }
-  }, [isLoading, locales]);
+  }, [isLoading, variations]);
 
   return null;
 };

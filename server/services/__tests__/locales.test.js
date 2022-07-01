@@ -1,26 +1,26 @@
 'use strict';
 
-const localesService = require('../locales')();
+const variationsService = require('../variations')();
 
 const fakeMetricsService = {
   sendDidInitializeEvent() {},
-  sendDidUpdateI18nLocalesEvent() {},
+  sendDidUpdatePersonalizationVariationsEvent() {},
 };
 
-describe('Locales', () => {
+describe('Variations', () => {
   describe('setIsDefault', () => {
     test('Set isDefault to false', async () => {
       const get = jest.fn(() => Promise.resolve('en'));
       global.strapi = { store: () => ({ get }) };
 
-      const locale = {
+      const variation = {
         code: 'fr',
         name: 'French',
       };
 
-      const enrichedLocale = await localesService.setIsDefault(locale);
-      expect(enrichedLocale).toMatchObject({
-        ...locale,
+      const enrichedVariation = await variationsService.setIsDefault(locale);
+      expect(enrichedVariation).toMatchObject({
+        ...variation,
         isDefault: false,
       });
     });
@@ -29,160 +29,160 @@ describe('Locales', () => {
       const get = jest.fn(() => Promise.resolve('en'));
       global.strapi = { store: () => ({ get }) };
 
-      const locale = {
+      const variation = {
         code: 'en',
         name: 'English',
       };
 
-      const enrichedLocale = await localesService.setIsDefault(locale);
-      expect(enrichedLocale).toMatchObject({
-        ...locale,
+      const enrichedVariation = await variationsService.setIsDefault(locale);
+      expect(enrichedVariation).toMatchObject({
+        ...variation,
         isDefault: true,
       });
     });
   });
 
-  describe('getDefaultLocale', () => {
-    test('get default locale', async () => {
+  describe('getDefaultVariation', () => {
+    test('get default variation', async () => {
       const get = jest.fn(() => Promise.resolve('en'));
       global.strapi = { store: () => ({ get }) };
 
-      const defaultLocaleCode = await localesService.getDefaultLocale();
-      expect(defaultLocaleCode).toBe('en');
+      const defaultVariationCode = await variationsService.getDefaultLocale();
+      expect(defaultVariationCode).toBe('en');
     });
   });
 
-  describe('setDefaultLocale', () => {
-    test('set default locale', async () => {
+  describe('setDefaultVariation', () => {
+    test('set default variation', async () => {
       const set = jest.fn(() => Promise.resolve());
       global.strapi = { store: () => ({ set }) };
 
-      await localesService.setDefaultLocale({ code: 'fr-CA' });
-      expect(set).toHaveBeenCalledWith({ key: 'default_locale', value: 'fr-CA' });
+      await variationsService.setDefaultVariation({ code: 'fr-CA' });
+      expect(set).toHaveBeenCalledWith({ key: 'default_variation', value: 'fr-CA' });
     });
   });
 
   describe('CRUD', () => {
     test('find', async () => {
-      const locales = [{ name: 'French', code: 'fr' }];
-      const findMany = jest.fn(() => Promise.resolve(locales));
+      const variations = [{ name: 'French', code: 'fr' }];
+      const findMany = jest.fn(() => Promise.resolve(variations));
       const query = jest.fn(() => ({ findMany }));
       global.strapi = { query };
       const params = { name: { $contains: 'en' } };
 
-      const localesFound = await localesService.find(params);
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+      const variationsFound = await variationsService.find(params);
+      expect(query).toHaveBeenCalledWith('plugin::personalization.variation');
       expect(findMany).toHaveBeenCalledWith({ where: params });
-      expect(localesFound).toMatchObject(locales);
+      expect(variationsFound).toMatchObject(variations);
     });
 
     test('findById', async () => {
-      const locale = { name: 'French', code: 'fr' };
-      const findOne = jest.fn(() => Promise.resolve(locale));
+      const variation = { name: 'French', code: 'fr' };
+      const findOne = jest.fn(() => Promise.resolve(variation));
       const query = jest.fn(() => ({ findOne }));
       global.strapi = { query };
 
-      const localeFound = await localesService.findById(1);
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+      const variationFound = await variationsService.findById(1);
+      expect(query).toHaveBeenCalledWith('plugin::personalization.variation');
       expect(findOne).toHaveBeenCalledWith({ where: { id: 1 } });
-      expect(localeFound).toMatchObject(locale);
+      expect(variationFound).toMatchObject(locale);
     });
 
     test('findByCode', async () => {
-      const locale = { name: 'French', code: 'fr' };
-      const findOne = jest.fn(() => Promise.resolve(locale));
+      const variation = { name: 'French', code: 'fr' };
+      const findOne = jest.fn(() => Promise.resolve(variation));
       const query = jest.fn(() => ({ findOne }));
       global.strapi = { query };
 
-      const localeFound = await localesService.findByCode('fr');
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+      const variationFound = await variationsService.findByCode('fr');
+      expect(query).toHaveBeenCalledWith('plugin::personalization.variation');
       expect(findOne).toHaveBeenCalledWith({ where: { code: 'fr' } });
-      expect(localeFound).toMatchObject(locale);
+      expect(variationFound).toMatchObject(locale);
     });
 
     test('create', async () => {
-      const locale = { name: 'French', code: 'fr' };
-      const create = jest.fn(() => locale);
+      const variation = { name: 'French', code: 'fr' };
+      const create = jest.fn(() => variation);
       const query = jest.fn(() => ({ create }));
       global.strapi = {
         query,
         plugins: {
-          i18n: {
+          personalization: {
             services: { metrics: fakeMetricsService },
           },
         },
       };
 
-      const createdLocale = await localesService.create(locale);
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
-      expect(create).toHaveBeenCalledWith({ data: locale });
-      expect(createdLocale).toMatchObject(locale);
+      const createdVariation = await variationsService.create(locale);
+      expect(query).toHaveBeenCalledWith('plugin::personalization.variation');
+      expect(create).toHaveBeenCalledWith({ data: variation });
+      expect(createdVariation).toMatchObject(variation);
     });
 
     test('update', async () => {
-      const locale = { name: 'French', code: 'fr' };
-      const update = jest.fn(() => locale);
+      const variation = { name: 'French', code: 'fr' };
+      const update = jest.fn(() => variation);
       const query = jest.fn(() => ({ update }));
       global.strapi = {
         query,
         plugins: {
-          i18n: {
+          personalization: {
             services: { metrics: fakeMetricsService },
           },
         },
       };
 
-      const updatedLocale = await localesService.update({ code: 'fr' }, { name: 'French' });
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+      const updatedVariation = await variationsService.update({ code: 'fr' }, { name: 'French' });
+      expect(query).toHaveBeenCalledWith('plugin::personalization.variation');
       expect(update).toHaveBeenCalledWith({ where: { code: 'fr' }, data: { name: 'French' } });
-      expect(updatedLocale).toMatchObject(locale);
+      expect(updatedVariation).toMatchObject(variation);
     });
 
     test('delete', async () => {
-      const locale = { name: 'French', code: 'fr' };
-      const deleteFn = jest.fn(() => locale);
+      const variation = { name: 'French', code: 'fr' };
+      const deleteFn = jest.fn(() => variation);
       const deleteMany = jest.fn(() => []);
-      const findOne = jest.fn(() => locale);
-      const isLocalizedContentType = jest.fn(() => true);
+      const findOne = jest.fn(() => variation);
+      const isPersonalizedContentType = jest.fn(() => true);
       const query = jest.fn(() => ({ delete: deleteFn, findOne, deleteMany }));
       global.strapi = {
         query,
         plugins: {
-          i18n: {
-            services: { metrics: fakeMetricsService, 'content-types': { isLocalizedContentType } },
+          personalization: {
+            services: { metrics: fakeMetricsService, 'content-types': { isPersonalizedContentType } },
           },
         },
         contentTypes: { 'api::country.country': {} },
       };
 
-      const deletedLocale = await localesService.delete({ id: 1 });
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+      const deletedVariation = await variationsService.delete({ id: 1 });
+      expect(query).toHaveBeenCalledWith('plugin::personalization.variation');
       expect(deleteFn).toHaveBeenCalledWith({ where: { id: 1 } });
-      expect(deletedLocale).toMatchObject(locale);
+      expect(deletedVariation).toMatchObject(variation);
     });
 
     test('delete - not found', async () => {
-      const locale = { name: 'French', code: 'fr' };
-      const deleteFn = jest.fn(() => locale);
+      const variation = { name: 'French', code: 'fr' };
+      const deleteFn = jest.fn(() => variation);
       const findOne = jest.fn(() => undefined);
       const query = jest.fn(() => ({ delete: deleteFn, findOne }));
       global.strapi = {
         query,
         plugins: {
-          i18n: {
+          personalization: {
             services: { metrics: fakeMetricsService },
           },
         },
       };
 
-      const deletedLocale = await localesService.delete({ id: 1 });
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+      const deletedVariation = await variationsService.delete({ id: 1 });
+      expect(query).toHaveBeenCalledWith('plugin::personalization.variation');
       expect(deleteFn).not.toHaveBeenCalled();
-      expect(deletedLocale).toBeUndefined();
+      expect(deletedVariation).toBeUndefined();
     });
   });
 
-  describe('initDefaultLocale', () => {
+  describe('initDefaultVariation', () => {
     test('create default local if none exists', async () => {
       const count = jest.fn(() => Promise.resolve(0));
       const create = jest.fn(() => Promise.resolve());
@@ -197,7 +197,7 @@ describe('Locales', () => {
           set,
         }),
         plugins: {
-          i18n: {
+          personalization: {
             services: {
               metrics: fakeMetricsService,
             },
@@ -205,7 +205,7 @@ describe('Locales', () => {
         },
       };
 
-      await localesService.initDefaultLocale();
+      await variationsService.initDefaultVariation();
       expect(count).toHaveBeenCalledWith();
       expect(create).toHaveBeenCalledWith({
         data: {
@@ -213,7 +213,7 @@ describe('Locales', () => {
           code: 'en',
         },
       });
-      expect(set).toHaveBeenCalledWith({ key: 'default_locale', value: 'en' });
+      expect(set).toHaveBeenCalledWith({ key: 'default_variation', value: 'en' });
     });
 
     test('does not create default local if one already exists', async () => {
@@ -231,7 +231,7 @@ describe('Locales', () => {
         }),
       };
 
-      await localesService.initDefaultLocale();
+      await variationsService.initDefaultVariation();
       expect(count).toHaveBeenCalledWith();
       expect(create).not.toHaveBeenCalled();
       expect(set).not.toHaveBeenCalled();

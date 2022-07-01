@@ -1,8 +1,8 @@
 'use strict';
 
 const { ApplicationError } = require('@strapi/utils').errors;
-const { listLocales, createLocale, updateLocale, deleteLocale } = require('../locales');
-const localeModel = require('../../content-types/locale');
+const { listVariations, createLocale, updateLocale, deleteLocale } = require('../variations');
+const variationModel = require('../../content-types/locale');
 
 const sanitizers = {
   get() {
@@ -10,20 +10,20 @@ const sanitizers = {
   },
 };
 
-describe('Locales', () => {
-  describe('listLocales', () => {
-    test('can get locales', async () => {
-      const locales = [{ code: 'af', name: 'Afrikaans (af)' }];
-      const expectedLocales = [{ code: 'af', name: 'Afrikaans (af)', isDefault: true }];
-      const setIsDefault = jest.fn(() => expectedLocales);
-      const find = jest.fn(() => locales);
-      const getModel = jest.fn(() => localeModel.schema);
+describe('Variations', () => {
+  describe('listVariations', () => {
+    test('can get variations', async () => {
+      const variations = [{ code: 'af', name: 'Afrikaans (af)' }];
+      const expectedVariations = [{ code: 'af', name: 'Afrikaans (af)', isDefault: true }];
+      const setIsDefault = jest.fn(() => expectedVariations);
+      const find = jest.fn(() => variations);
+      const getModel = jest.fn(() => variationModel.schema);
       global.strapi = {
         getModel,
         plugins: {
-          i18n: {
+          personalization: {
             services: {
-              locales: {
+              variations: {
                 find,
                 setIsDefault,
               },
@@ -34,35 +34,35 @@ describe('Locales', () => {
       };
 
       const ctx = {};
-      await listLocales(ctx);
+      await listVariations(ctx);
 
-      expect(setIsDefault).toHaveBeenCalledWith(locales);
+      expect(setIsDefault).toHaveBeenCalledWith(variations);
       expect(find).toHaveBeenCalledWith();
-      expect(ctx.body).toMatchObject(expectedLocales);
+      expect(ctx.body).toMatchObject(expectedVariations);
     });
   });
 
-  describe('createLocale', () => {
-    test('can create a locale (isDefault: true)', async () => {
-      const locale = { code: 'af', name: 'Afrikaans (af)' };
-      const expectedLocales = { code: 'af', name: 'Afrikaans (af)', isDefault: true };
-      const getDefaultLocale = jest.fn(() => Promise.resolve('af'));
-      const setDefaultLocale = jest.fn(() => Promise.resolve());
+  describe('createVariation', () => {
+    test('can create a variation (isDefault: true)', async () => {
+      const variation = { code: 'af', name: 'Afrikaans (af)' };
+      const expectedVariations = { code: 'af', name: 'Afrikaans (af)', isDefault: true };
+      const getDefaultVariation = jest.fn(() => Promise.resolve('af'));
+      const setDefaultVariation = jest.fn(() => Promise.resolve());
 
-      const setIsDefault = jest.fn(() => expectedLocales);
+      const setIsDefault = jest.fn(() => expectedVariations);
       const findByCode = jest.fn(() => undefined);
-      const create = jest.fn(() => Promise.resolve(locale));
-      const getModel = jest.fn(() => localeModel.schema);
+      const create = jest.fn(() => Promise.resolve(variation));
+      const getModel = jest.fn(() => variationModel.schema);
       global.strapi = {
         getModel,
         plugins: {
-          i18n: {
+          personalization: {
             services: {
-              locales: {
+              variations: {
                 findByCode,
                 setIsDefault,
-                getDefaultLocale,
-                setDefaultLocale,
+                getDefaultVariation,
+                setDefaultVariation,
                 create,
               },
             },
@@ -71,34 +71,34 @@ describe('Locales', () => {
         sanitizers,
       };
 
-      const ctx = { request: { body: { ...locale, isDefault: true } }, state: { user: { id: 1 } } };
-      await createLocale(ctx);
+      const ctx = { request: { body: { ...variation, isDefault: true } }, state: { user: { id: 1 } } };
+      await createVariation(ctx);
 
-      expect(setIsDefault).toHaveBeenCalledWith(locale);
-      expect(setDefaultLocale).toHaveBeenCalledWith(locale);
+      expect(setIsDefault).toHaveBeenCalledWith(variation);
+      expect(setDefaultVariation).toHaveBeenCalledWith(variation);
       expect(findByCode).toHaveBeenCalledWith('af');
-      expect(create).toHaveBeenCalledWith({ createdBy: 1, updatedBy: 1, ...locale });
-      expect(ctx.body).toMatchObject(expectedLocales);
+      expect(create).toHaveBeenCalledWith({ createdBy: 1, updatedBy: 1, ...variation });
+      expect(ctx.body).toMatchObject(expectedVariations);
     });
 
-    test('can create a locale (isDefault: false)', async () => {
-      const locale = { code: 'af', name: 'Afrikaans (af)' };
-      const expectedLocale = { code: 'af', name: 'Afrikaans (af)', isDefault: false };
-      const getDefaultLocale = jest.fn(() => Promise.resolve('en'));
+    test('can create a variation (isDefault: false)', async () => {
+      const variation = { code: 'af', name: 'Afrikaans (af)' };
+      const expectedVariation = { code: 'af', name: 'Afrikaans (af)', isDefault: false };
+      const getDefaultVariation = jest.fn(() => Promise.resolve('en'));
 
-      const setIsDefault = jest.fn(() => expectedLocale);
+      const setIsDefault = jest.fn(() => expectedVariation);
       const findByCode = jest.fn(() => undefined);
-      const create = jest.fn(() => Promise.resolve(locale));
-      const getModel = jest.fn(() => localeModel.schema);
+      const create = jest.fn(() => Promise.resolve(variation));
+      const getModel = jest.fn(() => variationModel.schema);
       global.strapi = {
         getModel,
         plugins: {
-          i18n: {
+          personalization: {
             services: {
-              locales: {
+              variations: {
                 findByCode,
                 setIsDefault,
-                getDefaultLocale,
+                getDefaultVariation,
                 create,
               },
             },
@@ -108,35 +108,35 @@ describe('Locales', () => {
       };
 
       const ctx = {
-        request: { body: { ...locale, isDefault: false } },
+        request: { body: { ...variation, isDefault: false } },
         state: { user: { id: 1 } },
       };
-      await createLocale(ctx);
+      await createVariation(ctx);
 
-      expect(setIsDefault).toHaveBeenCalledWith(locale);
+      expect(setIsDefault).toHaveBeenCalledWith(variation);
       expect(findByCode).toHaveBeenCalledWith('af');
-      expect(create).toHaveBeenCalledWith({ createdBy: 1, updatedBy: 1, ...locale });
-      expect(ctx.body).toMatchObject(expectedLocale);
+      expect(create).toHaveBeenCalledWith({ createdBy: 1, updatedBy: 1, ...variation });
+      expect(ctx.body).toMatchObject(expectedVariation);
     });
 
-    test('cannot create a locale that already exists', async () => {
-      const locale = { code: 'af', name: 'Afrikaans (af)' };
-      const expectedLocale = { code: 'af', name: 'Afrikaans (af)', isDefault: false };
-      const getDefaultLocale = jest.fn(() => Promise.resolve('en'));
+    test('cannot create a variation that already exists', async () => {
+      const variation = { code: 'af', name: 'Afrikaans (af)' };
+      const expectedVariation = { code: 'af', name: 'Afrikaans (af)', isDefault: false };
+      const getDefaultVariation = jest.fn(() => Promise.resolve('en'));
 
-      const setIsDefault = jest.fn(() => expectedLocale);
-      const findByCode = jest.fn(() => ({ name: 'other locale', code: 'af' }));
-      const create = jest.fn(() => Promise.resolve(locale));
-      const getModel = jest.fn(() => localeModel.schema);
+      const setIsDefault = jest.fn(() => expectedVariation);
+      const findByCode = jest.fn(() => ({ name: 'other variation', code: 'af' }));
+      const create = jest.fn(() => Promise.resolve(variation));
+      const getModel = jest.fn(() => variationModel.schema);
       global.strapi = {
         getModel,
         plugins: {
-          i18n: {
+          personalization: {
             services: {
-              locales: {
+              variations: {
                 findByCode,
                 setIsDefault,
-                getDefaultLocale,
+                getDefaultVariation,
                 create,
               },
             },
@@ -146,17 +146,17 @@ describe('Locales', () => {
       };
 
       const ctx = {
-        request: { body: { ...locale, isDefault: false } },
+        request: { body: { ...variation, isDefault: false } },
         state: { user: { id: 1 } },
       };
 
       expect.assertions(4);
 
       try {
-        await createLocale(ctx);
+        await createVariation(ctx);
       } catch (e) {
         expect(e instanceof ApplicationError).toBe(true);
-        expect(e.message).toEqual('This locale already exists');
+        expect(e.message).toEqual('This variation already exists');
       }
 
       expect(findByCode).toHaveBeenCalledWith('af');
@@ -164,27 +164,27 @@ describe('Locales', () => {
     });
   });
 
-  describe('updateLocale', () => {
-    test('can update a locale', async () => {
-      const updatedLocale = { name: 'Afrikaans', code: 'af' };
-      const existingLocale = { name: 'Afrikaans (af)', code: 'af' };
+  describe('updateVariation', () => {
+    test('can update a variation', async () => {
+      const updatedVariation = { name: 'Afrikaans', code: 'af' };
+      const existingVariation = { name: 'Afrikaans (af)', code: 'af' };
       const updates = { name: 'Afrikaans' };
-      const expectedLocales = { code: 'af', name: 'Afrikaans', isDefault: true };
-      const setDefaultLocale = jest.fn(() => Promise.resolve());
+      const expectedVariations = { code: 'af', name: 'Afrikaans', isDefault: true };
+      const setDefaultVariation = jest.fn(() => Promise.resolve());
 
-      const setIsDefault = jest.fn(() => expectedLocales);
-      const findById = jest.fn(() => existingLocale);
-      const update = jest.fn(() => Promise.resolve(updatedLocale));
-      const getModel = jest.fn(() => localeModel.schema);
+      const setIsDefault = jest.fn(() => expectedVariations);
+      const findById = jest.fn(() => existingVariation);
+      const update = jest.fn(() => Promise.resolve(updatedVariation));
+      const getModel = jest.fn(() => variationModel.schema);
       global.strapi = {
         getModel,
         plugins: {
-          i18n: {
+          personalization: {
             services: {
-              locales: {
+              variations: {
                 findById,
                 setIsDefault,
-                setDefaultLocale,
+                setDefaultVariation,
                 update,
               },
             },
@@ -198,35 +198,35 @@ describe('Locales', () => {
         request: { body: { ...updates, isDefault: true } },
         state: { user: { id: 1 } },
       };
-      await updateLocale(ctx);
+      await updateVariation(ctx);
 
-      expect(setIsDefault).toHaveBeenCalledWith(updatedLocale);
-      expect(setDefaultLocale).toHaveBeenCalledWith(updatedLocale);
+      expect(setIsDefault).toHaveBeenCalledWith(updatedVariation);
+      expect(setDefaultVariation).toHaveBeenCalledWith(updatedLocale);
       expect(findById).toHaveBeenCalledWith(1);
       expect(update).toHaveBeenCalledWith({ id: 1 }, { updatedBy: 1, ...updates });
-      expect(ctx.body).toMatchObject(expectedLocales);
+      expect(ctx.body).toMatchObject(expectedVariations);
     });
 
-    test('cannot update the code of a locale', async () => {
-      const updatedLocale = { name: 'Afrikaans', code: 'af' };
-      const existingLocale = { name: 'Afrikaans (af)', code: 'af' };
+    test('cannot update the code of a variation', async () => {
+      const updatedVariation = { name: 'Afrikaans', code: 'af' };
+      const existingVariation = { name: 'Afrikaans (af)', code: 'af' };
       const updates = { name: 'Afrikaans', code: 'fr' };
-      const expectedLocales = { code: 'af', name: 'Afrikaans', isDefault: true };
-      const setDefaultLocale = jest.fn(() => Promise.resolve());
+      const expectedVariations = { code: 'af', name: 'Afrikaans', isDefault: true };
+      const setDefaultVariation = jest.fn(() => Promise.resolve());
 
-      const setIsDefault = jest.fn(() => expectedLocales);
-      const findById = jest.fn(() => existingLocale);
-      const update = jest.fn(() => Promise.resolve(updatedLocale));
-      const getModel = jest.fn(() => localeModel.schema);
+      const setIsDefault = jest.fn(() => expectedVariations);
+      const findById = jest.fn(() => existingVariation);
+      const update = jest.fn(() => Promise.resolve(updatedVariation));
+      const getModel = jest.fn(() => variationModel.schema);
       global.strapi = {
         getModel,
         plugins: {
-          i18n: {
+          personalization: {
             services: {
-              locales: {
+              variations: {
                 findById,
                 setIsDefault,
-                setDefaultLocale,
+                setDefaultVariation,
                 update,
               },
             },
@@ -244,7 +244,7 @@ describe('Locales', () => {
       expect.assertions(6);
 
       try {
-        await updateLocale(ctx);
+        await updateVariation(ctx);
       } catch (e) {
         expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toEqual('this field has unspecified keys: code');
@@ -253,29 +253,29 @@ describe('Locales', () => {
       expect(findById).not.toHaveBeenCalled();
       expect(update).not.toHaveBeenCalled();
       expect(setIsDefault).not.toHaveBeenCalled();
-      expect(setDefaultLocale).not.toHaveBeenCalled();
+      expect(setDefaultVariation).not.toHaveBeenCalled();
     });
   });
 
-  describe('deleteLocale', () => {
-    test('can delete a locale', async () => {
-      const locale = { code: 'af', name: 'Afrikaans (af)' };
-      const expectedLocales = { code: 'af', name: 'Afrikaans (af)', isDefault: false };
-      const getDefaultLocale = jest.fn(() => Promise.resolve('en'));
+  describe('deleteVariation', () => {
+    test('can delete a variation', async () => {
+      const variation = { code: 'af', name: 'Afrikaans (af)' };
+      const expectedVariations = { code: 'af', name: 'Afrikaans (af)', isDefault: false };
+      const getDefaultVariation = jest.fn(() => Promise.resolve('en'));
 
-      const setIsDefault = jest.fn(() => expectedLocales);
-      const findById = jest.fn(() => locale);
+      const setIsDefault = jest.fn(() => expectedVariations);
+      const findById = jest.fn(() => variation);
       const deleteFn = jest.fn();
-      const getModel = jest.fn(() => localeModel.schema);
+      const getModel = jest.fn(() => variationModel.schema);
       global.strapi = {
         getModel,
         plugins: {
-          i18n: {
+          personalization: {
             services: {
-              locales: {
+              variations: {
                 findById,
                 setIsDefault,
-                getDefaultLocale,
+                getDefaultVariation,
                 delete: deleteFn,
               },
             },
@@ -285,31 +285,31 @@ describe('Locales', () => {
       };
 
       const ctx = { params: { id: 1 } };
-      await deleteLocale(ctx);
+      await deleteVariation(ctx);
 
-      expect(setIsDefault).toHaveBeenCalledWith(locale);
+      expect(setIsDefault).toHaveBeenCalledWith(variation);
       expect(findById).toHaveBeenCalledWith(1);
       expect(deleteFn).toHaveBeenCalledWith({ id: 1 });
-      expect(ctx.body).toMatchObject(expectedLocales);
+      expect(ctx.body).toMatchObject(expectedVariations);
     });
 
-    test('cannot delete the default locale', async () => {
-      const locale = { code: 'af', name: 'Afrikaans (af)' };
-      const expectedLocales = { code: 'af', name: 'Afrikaans (af)', isDefault: false };
-      const getDefaultLocale = jest.fn(() => Promise.resolve('af'));
+    test('cannot delete the default variation', async () => {
+      const variation = { code: 'af', name: 'Afrikaans (af)' };
+      const expectedVariations = { code: 'af', name: 'Afrikaans (af)', isDefault: false };
+      const getDefaultVariation = jest.fn(() => Promise.resolve('af'));
 
-      const setIsDefault = jest.fn(() => Promise.resolve(expectedLocales));
-      const findById = jest.fn(() => Promise.resolve(locale));
+      const setIsDefault = jest.fn(() => Promise.resolve(expectedVariations));
+      const findById = jest.fn(() => Promise.resolve(variation));
       const deleteFn = jest.fn();
-      const getModel = jest.fn(() => localeModel.schema);
+      const getModel = jest.fn(() => variationModel.schema);
       global.strapi = {
         getModel,
         plugins: {
-          i18n: {
+          personalization: {
             services: {
-              locales: {
+              variations: {
                 findById,
-                getDefaultLocale,
+                getDefaultVariation,
                 delete: deleteFn,
               },
             },
@@ -323,10 +323,10 @@ describe('Locales', () => {
       expect.assertions(5);
 
       try {
-        await deleteLocale(ctx);
+        await deleteVariation(ctx);
       } catch (e) {
         expect(e instanceof ApplicationError).toBe(true);
-        expect(e.message).toEqual('Cannot delete the default locale');
+        expect(e.message).toEqual('Cannot delete the default variation');
       }
 
       expect(findById).toHaveBeenCalledWith(1);

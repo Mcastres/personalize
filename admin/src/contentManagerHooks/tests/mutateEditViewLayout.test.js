@@ -1,5 +1,5 @@
 import React from 'react';
-import I18N from '@strapi/icons/Earth';
+import Personalization from '@strapi/icons/Earth';
 import StrikedWorld from '@strapi/icons/EarthStriked';
 import LabelAction from '../../components/LabelAction';
 import { getTrad } from '../../utils';
@@ -9,18 +9,18 @@ import mutateEditViewLayout, {
   enhanceRelationLayout,
 } from '../mutateEditViewLayout';
 
-const localizedTrad = getTrad('Field.localized');
-const localizedTradDefaultMessage = 'This value is unique for the selected locale';
-const notLocalizedTrad = getTrad('Field.not-localized');
-const notLocalizedTradDefaultMessage = 'This value is common to all locales';
+const personalizedTrad = getTrad('Field.localized');
+const personalizedTradDefaultMessage = 'This value is unique for the selected variation';
+const notPersonalizedTrad = getTrad('Field.not-personalized');
+const notPersonalizedTradDefaultMessage = 'This value is common to all variations';
 
-describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
-  it('should forward when i18n is not enabled on the content type', () => {
+describe('personalization | contentManagerHooks | mutateEditViewLayout', () => {
+  it('should forward when personalization is not enabled on the content type', () => {
     const layout = {
       components: {},
       contentType: {
         uid: 'test',
-        pluginOptions: { i18n: { localized: false } },
+        pluginOptions: { personalization: { personalized: false } },
         layouts: {
           edit: ['test'],
         },
@@ -35,11 +35,11 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
     expect(results).toEqual(data);
   });
 
-  it('should forward the action when i18n is enabled and the query.locale is not defined', () => {
+  it('should forward the action when personalization is enabled and the query.variation is not defined', () => {
     const layout = {
       contentType: {
         uid: 'test',
-        pluginOptions: { i18n: { localized: true } },
+        pluginOptions: { personalization: { personalized: true } },
         layouts: {
           edit: [],
           editRelations: [
@@ -65,11 +65,11 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
     expect(results).toEqual(data);
   });
 
-  it('should modify the editRelations layout when i18n is enabled and the query.locale is defined', () => {
+  it('should modify the editRelations layout when personalization is enabled and the query.variation is defined', () => {
     const layout = {
       contentType: {
         uid: 'test',
-        pluginOptions: { i18n: { localized: true } },
+        pluginOptions: { personalization: { personalized: true } },
         layouts: {
           edit: [],
           editRelations: [
@@ -80,7 +80,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
               queryInfos: {
                 test: true,
                 defaultParams: {},
-                paramsToKeep: ['plugins.i18n.locale'],
+                paramsToKeep: ['plugins.personalization.variation'],
               },
               size: 6,
               targetModelPluginOptions: {},
@@ -93,7 +93,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
 
     const data = {
       layout,
-      query: { plugins: { i18n: { locale: 'en' } } },
+      query: { plugins: { personalization: { variation: 'en' } } },
     };
     const results = mutateEditViewLayout(data);
 
@@ -113,14 +113,14 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                 queryInfos: {
                   test: true,
                   defaultParams: {},
-                  paramsToKeep: ['plugins.i18n.locale'],
+                  paramsToKeep: ['plugins.personalization.variation'],
                 },
                 size: 6,
                 targetModelPluginOptions: {},
                 labelAction: (
                   <LabelAction
-                    title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
-                    icon={<I18N aria-hidden />}
+                    title={{ id: personalizedTrad, defaultMessage: localizedTradDefaultMessage }}
+                    icon={<Personalization aria-hidden />}
                   />
                 ),
               },
@@ -175,7 +175,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
       expect(enhanceComponentsLayout(components)).toEqual(expected);
     });
 
-    it('should not enhance the field when the type is relation and the targetModel.pluginOptions.i18.localized is disabled', () => {
+    it('should not enhance the field when the type is relation and the targetModel.pluginOptions.i18.personalized is disabled', () => {
       const components = {
         test: {
           test: true,
@@ -185,7 +185,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                 {
                   name: 'title',
                   fieldSchema: { type: 'relation' },
-                  targetModelPluginOptions: { i18n: { localized: false } },
+                  targetModelPluginOptions: { personalization: { personalized: false } },
                 },
                 {
                   name: 'content',
@@ -205,7 +205,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                 {
                   name: 'title',
                   fieldSchema: { type: 'relation' },
-                  targetModelPluginOptions: { i18n: { localized: false } },
+                  targetModelPluginOptions: { personalization: { personalized: false } },
                 },
                 {
                   name: 'content',
@@ -220,7 +220,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
       expect(enhanceComponentsLayout(components)).toEqual(expected);
     });
 
-    it('should modify the relation field when the targetModelPluginOptions.i18n.localized is enabled', () => {
+    it('should modify the relation field when the targetModelPluginOptions.personalization.personalized is enabled', () => {
       const components = {
         foo: {
           test: true,
@@ -230,7 +230,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                 {
                   name: 'title',
                   fieldSchema: { type: 'relation' },
-                  targetModelPluginOptions: { i18n: { localized: true } },
+                  targetModelPluginOptions: { personalization: { personalized: true } },
                   queryInfos: {
                     defaultParams: { test: true },
                   },
@@ -251,7 +251,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                 {
                   name: 'title',
                   fieldSchema: { type: 'relation' },
-                  targetModelPluginOptions: { i18n: { localized: true } },
+                  targetModelPluginOptions: { personalization: { personalized: true } },
                   queryInfos: {
                     defaultParams: { test: true },
                   },
@@ -274,10 +274,10 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                 {
                   name: 'title',
                   fieldSchema: { type: 'relation' },
-                  targetModelPluginOptions: { i18n: { localized: true } },
+                  targetModelPluginOptions: { personalization: { personalized: true } },
                   queryInfos: {
-                    defaultParams: { test: true, locale: 'en' },
-                    paramsToKeep: ['plugins.i18n.locale'],
+                    defaultParams: { test: true, variation: 'en' },
+                    paramsToKeep: ['plugins.personalization.variation'],
                   },
                 },
                 {
@@ -296,10 +296,10 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                 {
                   name: 'title',
                   fieldSchema: { type: 'relation' },
-                  targetModelPluginOptions: { i18n: { localized: true } },
+                  targetModelPluginOptions: { personalization: { personalized: true } },
                   queryInfos: {
-                    defaultParams: { test: true, locale: 'en' },
-                    paramsToKeep: ['plugins.i18n.locale'],
+                    defaultParams: { test: true, variation: 'en' },
+                    paramsToKeep: ['plugins.personalization.variation'],
                   },
                 },
                 {
@@ -317,14 +317,14 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
   });
 
   describe('enhanceEditLayout', () => {
-    it('should add the label icon to all fields with the localized translation when i18n is enabled', () => {
+    it('should add the label icon to all fields with the personalized translation when personalization is enabled', () => {
       const edit = [
         [
           {
             name: 'name',
             size: 6,
             fieldSchema: {
-              pluginOptions: { i18n: { localized: true } },
+              pluginOptions: { personalization: { personalized: true } },
               type: 'string',
             },
           },
@@ -334,7 +334,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
             name: 'test',
             size: 6,
             fieldSchema: {
-              pluginOptions: { i18n: { localized: true } },
+              pluginOptions: { personalization: { personalized: true } },
               type: 'string',
             },
           },
@@ -353,13 +353,13 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
             name: 'name',
             size: 6,
             fieldSchema: {
-              pluginOptions: { i18n: { localized: true } },
+              pluginOptions: { personalization: { personalized: true } },
               type: 'string',
             },
             labelAction: (
               <LabelAction
-                title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
-                icon={<I18N aria-hidden />}
+                title={{ id: personalizedTrad, defaultMessage: localizedTradDefaultMessage }}
+                icon={<Personalization aria-hidden />}
               />
             ),
           },
@@ -369,13 +369,13 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
             name: 'test',
             size: 6,
             fieldSchema: {
-              pluginOptions: { i18n: { localized: true } },
+              pluginOptions: { personalization: { personalized: true } },
               type: 'string',
             },
             labelAction: (
               <LabelAction
-                title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
-                icon={<I18N aria-hidden />}
+                title={{ id: personalizedTrad, defaultMessage: localizedTradDefaultMessage }}
+                icon={<Personalization aria-hidden />}
               />
             ),
           },
@@ -387,8 +387,8 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
             },
             labelAction: (
               <LabelAction
-                title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
-                icon={<I18N aria-hidden />}
+                title={{ id: personalizedTrad, defaultMessage: localizedTradDefaultMessage }}
+                icon={<Personalization aria-hidden />}
               />
             ),
           },
@@ -398,14 +398,14 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
       expect(enhanceEditLayout(edit)).toEqual(expected);
     });
 
-    it('should add the label icon to all fields with the not localized translation when i18n is disabled', () => {
+    it('should add the label icon to all fields with the not personalized translation when personalization is disabled', () => {
       const edit = [
         [
           {
             name: 'name',
             size: 6,
             fieldSchema: {
-              pluginOptions: { i18n: { localized: true } },
+              pluginOptions: { personalization: { personalized: true } },
               type: 'string',
             },
           },
@@ -415,7 +415,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
             name: 'test',
             size: 6,
             fieldSchema: {
-              pluginOptions: { i18n: { localized: false } },
+              pluginOptions: { personalization: { personalized: false } },
               type: 'string',
             },
           },
@@ -427,13 +427,13 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
             name: 'name',
             size: 6,
             fieldSchema: {
-              pluginOptions: { i18n: { localized: true } },
+              pluginOptions: { personalization: { personalized: true } },
               type: 'string',
             },
             labelAction: (
               <LabelAction
-                title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
-                icon={<I18N aria-hidden />}
+                title={{ id: personalizedTrad, defaultMessage: localizedTradDefaultMessage }}
+                icon={<Personalization aria-hidden />}
               />
             ),
           },
@@ -443,12 +443,12 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
             name: 'test',
             size: 6,
             fieldSchema: {
-              pluginOptions: { i18n: { localized: false } },
+              pluginOptions: { personalization: { personalized: false } },
               type: 'string',
             },
             labelAction: (
               <LabelAction
-                title={{ id: notLocalizedTrad, defaultMessage: notLocalizedTradDefaultMessage }}
+                title={{ id: notPersonalizedTrad, defaultMessage: notLocalizedTradDefaultMessage }}
                 icon={<StrikedWorld aria-hidden />}
               />
             ),
@@ -482,8 +482,8 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
           targetModelPluginOptions: {},
           labelAction: (
             <LabelAction
-              title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
-              icon={<I18N aria-hidden />}
+              title={{ id: personalizedTrad, defaultMessage: localizedTradDefaultMessage }}
+              icon={<Personalization aria-hidden />}
             />
           ),
         },
@@ -492,7 +492,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
       expect(enhanceRelationLayout(editRelations, 'en')).toEqual(expected);
     });
 
-    it('should add the locale to the queryInfos.defaultParams when the targetModelPluginOptions.i18n.localized is enabled', () => {
+    it('should add the variation to the queryInfos.defaultParams when the targetModelPluginOptions.personalization.personalized is enabled', () => {
       const editRelations = [
         {
           fieldSchema: {},
@@ -505,7 +505,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
           },
           size: 6,
           targetModelPluginOptions: {
-            i18n: { localized: true },
+            personalization: { personalized: true },
           },
         },
       ];
@@ -517,18 +517,18 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
           queryInfos: {
             defaultParams: {
               test: true,
-              locale: 'en',
+              variation: 'en',
             },
-            paramsToKeep: ['plugins.i18n.locale'],
+            paramsToKeep: ['plugins.personalization.variation'],
           },
           size: 6,
           targetModelPluginOptions: {
-            i18n: { localized: true },
+            personalization: { personalized: true },
           },
           labelAction: (
             <LabelAction
-              title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
-              icon={<I18N aria-hidden />}
+              title={{ id: personalizedTrad, defaultMessage: localizedTradDefaultMessage }}
+              icon={<Personalization aria-hidden />}
             />
           ),
         },

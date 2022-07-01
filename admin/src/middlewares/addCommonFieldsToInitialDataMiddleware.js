@@ -20,8 +20,8 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
 
   const search = action.rawQuery.substring(1);
   const query = parse(search);
-  const relatedEntityId = get(query, 'plugins.i18n.relatedEntityId', null);
-  const locale = get(query, 'plugins.i18n.locale', null);
+  const relatedEntityId = get(query, 'plugins.personalization.relatedEntityId', null);
+  const variation = get(query, 'plugins.personalization.variation', null);
   const isSingleType = action.isSingleType;
 
   if (!relatedEntityId && !isSingleType) {
@@ -40,14 +40,14 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
     const defaultDataStructure = cloneDeep(contentTypeDataStructure);
 
     try {
-      const requestURL = `/${pluginId}/content-manager/actions/get-non-localized-fields`;
-      const body = { model: currentLayout.contentType.uid, id: relatedEntityId, locale };
+      const requestURL = `/${pluginId}/content-manager/actions/get-non-personalized-fields`;
+      const body = { model: currentLayout.contentType.uid, id: relatedEntityId, variation };
 
       const data = await request(requestURL, { method: 'POST', body });
 
-      const { nonLocalizedFields, localizations } = data;
+      const { nonPersonalizedFields, personalizations } = data;
 
-      const merged = merge(defaultDataStructure, nonLocalizedFields);
+      const merged = merge(defaultDataStructure, nonPersonalizedFields);
 
       const fieldsToRemove = [
         'createdBy',
@@ -64,7 +64,7 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
         currentLayout.components,
         fieldsToRemove
       );
-      cleanedMerged.localizations = localizations;
+      cleanedMerged.personalizations = personalizations;
 
       action.data = formatContentTypeData(
         cleanedMerged,

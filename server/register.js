@@ -2,26 +2,26 @@
 
 const _ = require('lodash');
 
-const validateLocaleCreation = require('./controllers/validate-locale-creation');
+const validateVariationCreation = require('./controllers/validate-variation-creation');
 const { getService } = require('./utils');
 
 const enableContentType = require('./migrations/content-type/enable');
 const disableContentType = require('./migrations/content-type/disable');
 
 module.exports = ({ strapi }) => {
-  extendLocalizedContentTypes(strapi);
-  addContentManagerLocaleMiddleware(strapi);
+  extendPersonalizedContentTypes(strapi);
+  addContentManagerVariationMiddleware(strapi);
   addContentTypeSyncHooks(strapi);
 };
 
 /**
- * Adds middleware on CM creation routes to use i18n locale passed in a specific param
+ * Adds middleware on CM creation routes to use personalization variation passed in a specific param
  * @param {Strapi} strapi
  */
-const addContentManagerLocaleMiddleware = strapi => {
+const addContentManagerVariationMiddleware = strapi => {
   strapi.server.router.use('/content-manager/collection-types/:model', (ctx, next) => {
     if (ctx.method === 'POST') {
-      return validateLocaleCreation(ctx, next);
+      return validateVariationCreation(ctx, next);
     }
 
     return next();
@@ -29,7 +29,7 @@ const addContentManagerLocaleMiddleware = strapi => {
 
   strapi.server.router.use('/content-manager/single-types/:model', (ctx, next) => {
     if (ctx.method === 'PUT') {
-      return validateLocaleCreation(ctx, next);
+      return validateVariationCreation(ctx, next);
     }
 
     return next();
@@ -37,7 +37,7 @@ const addContentManagerLocaleMiddleware = strapi => {
 };
 
 /**
- * Adds hooks to migration content types locales on enable/disable of I18N
+ * Adds hooks to migration content types variations on enable/disable of Personalization
  * @param {Strapi} strapi
  */
 const addContentTypeSyncHooks = strapi => {
@@ -46,18 +46,18 @@ const addContentTypeSyncHooks = strapi => {
 };
 
 /**
- * Adds locale and localization fields to localized content types
+ * Adds variation and personalization fields to personalized content types
  * @param {Strapi} strapi
  */
-const extendLocalizedContentTypes = strapi => {
+const extendPersonalizedContentTypes = strapi => {
   const contentTypeService = getService('content-types');
   const coreApiService = getService('core-api');
 
   Object.values(strapi.contentTypes).forEach(contentType => {
-    if (contentTypeService.isLocalizedContentType(contentType)) {
+    if (contentTypeService.isPersonalizedContentType(contentType)) {
       const { attributes } = contentType;
 
-      _.set(attributes, 'localizations', {
+      _.set(attributes, 'personalizations', {
         writable: true,
         private: false,
         configurable: false,
@@ -67,7 +67,7 @@ const extendLocalizedContentTypes = strapi => {
         target: contentType.uid,
       });
 
-      _.set(attributes, 'locale', {
+      _.set(attributes, 'variation', {
         writable: true,
         private: false,
         configurable: false,
@@ -75,7 +75,7 @@ const extendLocalizedContentTypes = strapi => {
         type: 'string',
       });
 
-      coreApiService.addCreateLocalizationAction(contentType);
+      coreApiService.addCreatePersonalizationAction(contentType);
     }
   });
 

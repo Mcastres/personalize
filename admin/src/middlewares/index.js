@@ -1,13 +1,13 @@
 import addCommonFieldsToInitialDataMiddleware from './addCommonFieldsToInitialDataMiddleware';
 import extendCTBInitialDataMiddleware from './extendCTBInitialDataMiddleware';
 import extendCTBAttributeInitialDataMiddleware from './extendCTBAttributeInitialDataMiddleware';
-import localePermissionMiddleware from './localePermissionMiddleware';
+import variationPermissionMiddleware from './variationPermissionMiddleware';
 
 const middlewares = [
   addCommonFieldsToInitialDataMiddleware,
   extendCTBInitialDataMiddleware,
   extendCTBAttributeInitialDataMiddleware,
-  localePermissionMiddleware,
+  variationPermissionMiddleware,
 ];
 
 export default middlewares;

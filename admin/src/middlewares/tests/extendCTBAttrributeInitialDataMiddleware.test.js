@@ -1,6 +1,6 @@
 import extendCTBAttributeInitialDataMiddleware from '../extendCTBAttributeInitialDataMiddleware';
 
-describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
+describe('personalization | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
   it('should forward the action if the type is undefined', () => {
     const middleware = extendCTBAttributeInitialDataMiddleware();
     const action = { test: true, type: undefined };
@@ -41,7 +41,7 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
       expect(next).toBeCalledWith(action);
     });
 
-    it('should forward if the i18n is not activated is not contentType', () => {
+    it('should forward if the personalization is not activated is not contentType', () => {
       const middleware = extendCTBAttributeInitialDataMiddleware();
       const action = {
         forTarget: 'contentType',
@@ -51,7 +51,7 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
       const getState = jest.fn(() => ({
         'content-type-builder_dataManagerProvider': {
           modifiedData: {
-            contentType: { schema: { pluginOptions: { i18n: { localized: false } } } },
+            contentType: { schema: { pluginOptions: { personalization: { personalized: false } } } },
           },
         },
       }));
@@ -82,7 +82,7 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
     });
   });
 
-  it('should add the action.pluginOptions if the type is correct and i18n is activated', () => {
+  it('should add the action.pluginOptions if the type is correct and personalization is activated', () => {
     const middleware = extendCTBAttributeInitialDataMiddleware();
     const action = {
       forTarget: 'contentType',
@@ -91,9 +91,9 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
     };
     const getState = jest.fn(() => ({
       'content-type-builder_dataManagerProvider': {
-        // i18n is activated
+        // personalization is activated
         modifiedData: {
-          contentType: { schema: { pluginOptions: { i18n: { localized: true } } } },
+          contentType: { schema: { pluginOptions: { personalization: { personalized: true } } } },
         },
       },
     }));
@@ -104,7 +104,7 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
 
     expect(next).toBeCalledWith({
       ...action,
-      options: { pluginOptions: { i18n: { localized: true } } },
+      options: { pluginOptions: { personalization: { personalized: true } } },
     });
   });
 
@@ -117,9 +117,9 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
     };
     const getState = jest.fn(() => ({
       'content-type-builder_dataManagerProvider': {
-        // i18n is activated
+        // personalization is activated
         modifiedData: {
-          contentType: { schema: { pluginOptions: { i18n: { localized: true } } } },
+          contentType: { schema: { pluginOptions: { personalization: { personalized: true } } } },
         },
       },
     }));
@@ -130,7 +130,7 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
 
     expect(next).toBeCalledWith({
       ...action,
-      options: { pluginOptions: { pluginTest: { ok: true }, i18n: { localized: true } } },
+      options: { pluginOptions: { pluginTest: { ok: true }, personalization: { personalized: true } } },
     });
   });
 });

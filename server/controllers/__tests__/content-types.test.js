@@ -1,23 +1,23 @@
 'use strict';
 
 const { ApplicationError } = require('@strapi/utils').errors;
-const { getNonLocalizedAttributes } = require('../content-types');
+const { getNonPersonalizedAttributes } = require('../content-types');
 const ctService = require('../../services/content-types')();
 
-describe('i18n - Controller - content-types', () => {
-  describe('getNonLocalizedAttributes', () => {
+describe('personalization - Controller - content-types', () => {
+  describe('getNonPersonalizedAttributes', () => {
     beforeEach(() => {
       const contentType = () => ({});
       const getModel = () => ({});
       global.strapi = {
         contentType,
         getModel,
-        plugins: { i18n: { services: { 'content-types': ctService } } },
+        plugins: { personalization: { services: { 'content-types': ctService } } },
         admin: { services: { constants: { READ_ACTION: 'read', CREATE_ACTION: 'create' } } },
       };
     });
 
-    test('model not localized', async () => {
+    test('model not personalized', async () => {
       const badRequest = jest.fn();
       const ctx = {
         state: { user: {} },
@@ -25,7 +25,7 @@ describe('i18n - Controller - content-types', () => {
           body: {
             model: 'api::country.country',
             id: 1,
-            locale: 'fr',
+            variation: 'fr',
           },
         },
         badRequest,
@@ -34,17 +34,17 @@ describe('i18n - Controller - content-types', () => {
       expect.assertions(2);
 
       try {
-        await getNonLocalizedAttributes(ctx);
+        await getNonPersonalizedAttributes(ctx);
       } catch (e) {
         expect(e instanceof ApplicationError).toBe(true);
-        expect(e.message).toEqual('model.not.localized');
+        expect(e.message).toEqual('model.not.personalized');
       }
     });
 
     test('entity not found', async () => {
       const notFound = jest.fn();
       const findOne = jest.fn(() => Promise.resolve(undefined));
-      const contentType = jest.fn(() => ({ pluginOptions: { i18n: { localized: true } } }));
+      const contentType = jest.fn(() => ({ pluginOptions: { personalization: { personalized: true } } }));
 
       global.strapi.query = () => ({ findOne });
       global.strapi.contentType = contentType;
@@ -54,37 +54,37 @@ describe('i18n - Controller - content-types', () => {
           body: {
             model: 'api::country.country',
             id: 1,
-            locale: 'fr',
+            variation: 'fr',
           },
         },
         notFound,
       };
-      await getNonLocalizedAttributes(ctx);
+      await getNonPersonalizedAttributes(ctx);
 
       expect(notFound).toHaveBeenCalledWith();
     });
 
-    test('returns nonLocalizedFields', async () => {
+    test('returns nonPersonalizedFields', async () => {
       const model = {
-        pluginOptions: { i18n: { localized: true } },
+        pluginOptions: { personalization: { personalized: true } },
         attributes: {
           name: { type: 'string' },
           averagePrice: { type: 'integer' },
-          description: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+          description: { type: 'string', pluginOptions: { personalization: { personalized: true } } },
         },
       };
       const entity = {
         id: 1,
         name: "Papailhau's Pizza",
         description: 'Best pizza restaurant of the town',
-        locale: 'en',
+        variation: 'en',
         publishedAt: '2021-03-30T09:34:54.042Z',
-        localizations: [{ id: 2, locale: 'it', publishedAt: null }],
+        personalizations: [{ id: 2, variation: 'it', publishedAt: null }],
       };
       const permissions = [
-        { properties: { fields: ['name', 'averagePrice'], locales: ['it'] } },
-        { properties: { fields: ['name', 'description'], locales: ['fr'] } },
-        { properties: { fields: ['name'], locales: ['fr'] } },
+        { properties: { fields: ['name', 'averagePrice'], variations: ['it'] } },
+        { properties: { fields: ['name', 'description'], variations: ['fr'] } },
+        { properties: { fields: ['name'], variations: ['fr'] } },
       ];
 
       const findOne = jest.fn(() => Promise.resolve(entity));
@@ -100,11 +100,11 @@ describe('i18n - Controller - content-types', () => {
           body: {
             model: 'api::country.country',
             id: 1,
-            locale: 'fr',
+            variation: 'fr',
           },
         },
       };
-      await getNonLocalizedAttributes(ctx);
+      await getNonPersonalizedAttributes(ctx);
       expect(findMany).toHaveBeenCalledWith({
         where: {
           action: ['read', 'create'],
@@ -115,10 +115,10 @@ describe('i18n - Controller - content-types', () => {
         },
       });
       expect(ctx.body).toEqual({
-        nonLocalizedFields: { name: "Papailhau's Pizza" },
-        localizations: [
-          { id: 2, locale: 'it', publishedAt: null },
-          { id: 1, locale: 'en', publishedAt: '2021-03-30T09:34:54.042Z' },
+        nonPersonalizedFields: { name: "Papailhau's Pizza" },
+        personalizations: [
+          { id: 2, variation: 'it', publishedAt: null },
+          { id: 1, variation: 'en', publishedAt: '2021-03-30T09:34:54.042Z' },
         ],
       });
     });

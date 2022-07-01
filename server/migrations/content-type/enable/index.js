@@ -1,12 +1,12 @@
 'use strict';
 
 const { getService } = require('../../../utils');
-const { DEFAULT_LOCALE } = require('../../../constants');
+const { DEFAULT_VARIATION } = require('../../../constants');
 
-// if i18N enabled set default locale
+// if Personalization enabled set default variation
 module.exports = async ({ oldContentTypes, contentTypes }) => {
-  const { isLocalizedContentType } = getService('content-types');
-  const { getDefaultLocale } = getService('locales');
+  const { isPersonalizedContentType } = getService('content-types');
+  const { getDefaultVariation } = getService('variations');
 
   if (!oldContentTypes) {
     return;
@@ -20,13 +20,13 @@ module.exports = async ({ oldContentTypes, contentTypes }) => {
     const oldContentType = oldContentTypes[uid];
     const contentType = contentTypes[uid];
 
-    if (!isLocalizedContentType(oldContentType) && isLocalizedContentType(contentType)) {
-      const defaultLocale = (await getDefaultLocale()) || DEFAULT_LOCALE.slug;
+    if (!isPersonalizedContentType(oldContentType) && isPersonalizedContentType(contentType)) {
+      const defaultVariation = (await getDefaultVariation()) || DEFAULT_VARIATION.slug;
 
       await strapi.db
         .queryBuilder(uid)
-        .update({ locale: defaultLocale })
-        .where({ locale: null })
+        .update({ variation: defaultVariation })
+        .where({ variation: null })
         .execute();
     }
   }

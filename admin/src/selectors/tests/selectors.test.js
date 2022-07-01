@@ -1,8 +1,8 @@
 import { fixtures } from '../../../../../../admin-test-utils';
 import selectCollectionTypePermissions from '../selectCollectionTypesRelatedPermissions';
-import selectI18NLocales from '../selectI18nLocales';
+import selectPersonalizationVariations from '../selectPersonalizationVariations';
 
-describe('i18n | selectors | selectCollectionTypePermissions', () => {
+describe('personalization | selectors | selectCollectionTypePermissions', () => {
   let store;
 
   beforeEach(() => {
@@ -16,15 +16,15 @@ describe('i18n | selectors | selectCollectionTypePermissions', () => {
   });
 });
 
-describe('i18n | selectors | selectI18NLocales', () => {
+describe('personalization | selectors | selectPersonalizationVariations', () => {
   let store;
 
   beforeEach(() => {
-    store = { ...fixtures.store.state, i18n_locales: { isLoading: true, locales: [] } };
+    store = { ...fixtures.store.state, personalization_variations: { isLoading: true, variations: [] } };
   });
 
-  it('resolves the permissions key of the "i18n_locales" store key', () => {
-    const actual = selectI18NLocales(store);
+  it('resolves the permissions key of the "personalization_variations" store key', () => {
+    const actual = selectPersonalizationVariations(store);
 
     expect(actual).toBeDefined();
   });

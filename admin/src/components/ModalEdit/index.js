@@ -16,44 +16,44 @@ import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Divider } from '@strapi/design-system/Divider';
 import { Typography } from '@strapi/design-system/Typography';
-import localeFormSchema from '../../schemas';
-import useEditLocale from '../../hooks/useEditLocale';
+import variationFormSchema from '../../schemas';
+import useEditVariation from '../../hooks/useEditVariation';
 import { getTrad } from '../../utils';
 import BaseForm from './BaseForm';
 
-const ModalEdit = ({ locale, onClose }) => {
+const ModalEdit = ({ variation, onClose }) => {
   const { refetchPermissions } = useRBACProvider();
-  const { isEditing, editLocale } = useEditLocale();
+  const { isEditing, editVariation } = useEditVariation();
   const { formatMessage } = useIntl();
 
   const handleSubmit = async ({ slug, name }) => {
-    await editLocale(locale.id, { slug, name });
+    await editVariation(variation.id, { slug, name });
     await refetchPermissions();
   };
 
   return (
-    <ModalLayout onClose={onClose} labelledBy="edit-locale-title">
+    <ModalLayout onClose={onClose} labelledBy="edit-variation-title">
       <Formik
         initialValues={{
-          slug: locale?.slug,
-          name: locale?.name
+          slug: variation?.slug,
+          name: variation?.name
         }}
         onSubmit={handleSubmit}
-        validationSchema={localeFormSchema}
+        validationSchema={variationFormSchema}
       >
         <Form>
           <ModalHeader>
-            <Typography fontWeight="bold" textColor="neutral800" as="h2" id="edit-locale-title">
+            <Typography fontWeight="bold" textColor="neutral800" as="h2" id="edit-variation-title">
               {formatMessage({
                 id: getTrad('Settings.list.actions.edit'),
-                defaultMessage: 'Edit a locale',
+                defaultMessage: 'Edit a variation',
               })}
             </Typography>
           </ModalHeader>
           <ModalBody>
             <TabGroup
               label={formatMessage({
-                id: getTrad('Settings.locales.modal.title'),
+                id: getTrad('Settings.variations.modal.title'),
                 defaultMessage: 'Configurations',
               })}
               id="tabs"
@@ -62,14 +62,14 @@ const ModalEdit = ({ locale, onClose }) => {
               <Flex justifyContent="space-between">
                 <Typography as="h2">
                   {formatMessage({
-                    id: getTrad('Settings.locales.modal.title'),
+                    id: getTrad('Settings.variations.modal.title'),
                     defaultMessage: 'Configurations',
                   })}
                 </Typography>
                 <Tabs>
                   <Tab>
                     {formatMessage({
-                      id: getTrad('Settings.locales.modal.base'),
+                      id: getTrad('Settings.variations.modal.base'),
                       defaultMessage: 'Base settings',
                     })}
                   </Tab>
@@ -81,7 +81,7 @@ const ModalEdit = ({ locale, onClose }) => {
               <Box paddingTop={7} paddingBottom={7}>
                 <TabPanels>
                   <TabPanel>
-                    <BaseForm locale={locale} />
+                    <BaseForm variation={variation} />
                   </TabPanel>
                 </TabPanels>
               </Box>
@@ -107,11 +107,11 @@ const ModalEdit = ({ locale, onClose }) => {
 };
 
 ModalEdit.defaultProps = {
-  locale: undefined,
+  variation: undefined,
 };
 
 ModalEdit.propTypes = {
-  locale: PropTypes.shape({
+  variation: PropTypes.shape({
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     slug: PropTypes.string.isRequired,

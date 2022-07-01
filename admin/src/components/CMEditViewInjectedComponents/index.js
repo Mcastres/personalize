@@ -4,56 +4,56 @@ import has from 'lodash/has';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useCMEditViewDataManager, useQueryParams } from '@strapi/helper-plugin';
-import selectI18NLocales from '../../selectors/selectI18nLocales';
+import selectPersonalizationVariations from '../../selectors/selectPersonalizationVariations';
 import useContentTypePermissions from '../../hooks/useContentTypePermissions';
-import CMEditViewLocalePicker from './CMEditViewLocalePicker';
+import CMEditViewVariationPicker from './CMEditViewVariationPicker';
 
 const CMEditViewInjectedComponents = () => {
   const { layout, modifiedData, initialData, slug, isSingleType } = useCMEditViewDataManager();
   const { createPermissions, readPermissions } = useContentTypePermissions(slug);
-  const locales = useSelector(selectI18NLocales);
+  const variations = useSelector(selectPersonalizationVariations);
   const params = useParams();
   const [{ query }, setQuery] = useQueryParams();
 
   const id = get(params, 'id', null);
   const currentEntityId = id;
-  const defaultLocale = locales.find(loc => loc.isDefault);
-  const currentLocale = get(query, 'plugins.i18n.locale', defaultLocale.slug);
-  const hasI18nEnabled = get(layout, ['pluginOptions', 'i18n', 'localized'], false);
+  const defaultVariation = variations.find(loc => loc.isDefault);
+  const currentVariation = get(query, 'plugins.personalization.variation', defaultVariation.slug);
+  const hasPersonalizationEnabled = get(layout, ['pluginOptions', 'personalization', 'personalized'], false);
   const hasDraftAndPublishEnabled = get(layout, ['options', 'draftAndPublish'], false);
 
   const defaultQuery = useMemo(() => {
     if (!query) {
-      return { plugins: { i18n: { locale: currentLocale } } };
+      return { plugins: { personalization: { variation: currentVariation } } };
     }
 
     return query;
-  }, [query, currentLocale]);
+  }, [query, currentVariation]);
 
-  if (!hasI18nEnabled) {
+  if (!hasPersonalizationEnabled) {
     return null;
   }
 
-  if (!currentLocale) {
+  if (!currentVariation) {
     return null;
   }
 
-  const localizations = get(modifiedData, 'localizations', []);
+  const personalizations = get(modifiedData, 'personalizations', []);
 
-  let currentLocaleStatus = 'did-not-create-locale';
+  let currentVariationStatus = 'did-not-create-variation';
 
   if (has(initialData, 'publishedAt')) {
-    currentLocaleStatus = initialData.publishedAt ? 'published' : 'draft';
+    currentVariationStatus = initialData.publishedAt ? 'published' : 'draft';
   }
 
   return (
-    <CMEditViewLocalePicker
-      appLocales={locales}
+    <CMEditViewVariationPicker
+      appVariations={variations}
       currentEntityId={currentEntityId}
       createPermissions={createPermissions}
-      currentLocaleStatus={currentLocaleStatus}
+      currentVariationStatus={currentVariationStatus}
       hasDraftAndPublishEnabled={hasDraftAndPublishEnabled}
-      localizations={localizations}
+      personalizations={personalizations}
       isSingleType={isSingleType}
       query={defaultQuery}
       readPermissions={readPermissions}

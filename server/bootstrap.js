@@ -5,25 +5,25 @@ const { getService } = require('./utils');
 module.exports = async ({ strapi }) => {
   const { sendDidInitializeEvent } = getService('metrics');
   const { decorator } = getService('entity-service-decorator');
-  const { initDefaultLocale } = getService('locales');
+  const { initDefaultVariation } = getService('variations');
   const { sectionsBuilder, actions, engine } = getService('permissions');
 
   // Entity Service
   strapi.entityService.decorate(decorator);
 
   // Data
-  await initDefaultLocale();
+  await initDefaultVariation();
 
   // Sections Builder
-  sectionsBuilder.registerLocalesPropertyHandler();
+  sectionsBuilder.registerVariationsPropertyHandler();
 
   // Actions
-  await actions.registerI18nActions();
-  actions.registerI18nActionsHooks();
+  await actions.registerPersonalizationActions();
+  actions.registerPersonalizationActionsHooks();
   actions.updateActionsProperties();
 
   // Engine/Permissions
-  engine.registerI18nPermissionsHandlers();
+  engine.registerPersonalizationPermissionsHandlers();
 
   // Hooks & Models
   registerModelsHooks();
@@ -32,28 +32,28 @@ module.exports = async ({ strapi }) => {
 };
 
 const registerModelsHooks = () => {
-  const i18nModelUIDs = Object.values(strapi.contentTypes)
-    .filter(contentType => getService('content-types').isLocalizedContentType(contentType))
+  const personalizationModelUIDs = Object.values(strapi.contentTypes)
+    .filter(contentType => getService('content-types').isPersonalizedContentType(contentType))
     .map(contentType => contentType.uid);
 
-  if (i18nModelUIDs.length > 0) {
+  if (personalizationModelUIDs.length > 0) {
     strapi.db.lifecycles.subscribe({
-      models: i18nModelUIDs,
+      models: personalizationModelUIDs,
       async beforeCreate(event) {
-        await getService('localizations').assignDefaultLocale(event.params.data);
+        await getService('personalizations').assignDefaultVariation(event.params.data);
       },
     });
   }
 
   strapi.db.lifecycles.subscribe({
-    models: ['plugin::i18n.locale'],
+    models: ['plugin::personalization.variation'],
 
     async afterCreate() {
-      await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();
+      await getService('permissions').actions.syncSuperAdminPermissionsWithVariations();
     },
 
     async afterDelete() {
-      await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();
+      await getService('permissions').actions.syncSuperAdminPermissionsWithVariations();
     },
   });
 };

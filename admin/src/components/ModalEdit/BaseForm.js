@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import { useFormikContext } from 'formik';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { TextInput } from '@strapi/design-system/TextInput';
-import { Select, Option } from '@strapi/design-system/Select';
 import { getTrad } from '../../utils';
 
 const BaseForm = () => {
@@ -17,24 +16,24 @@ const BaseForm = () => {
         <TextInput
           name="name"
           label={formatMessage({
-            id: getTrad("Settings.locales.modal.locales.displayName"),
-            defaultMessage: "Locale display name",
+            id: getTrad("Settings.variations.modal.variations.displayName"),
+            defaultMessage: "Variation display name",
           })}
           hint={formatMessage({
             id: getTrad(
-              "Settings.locales.modal.locales.displayName.description"
+              "Settings.variations.modal.variations.displayName.description"
             ),
             defaultMessage:
-              "Locale will be displayed under that name in the administration panel",
+              "Variation will be displayed under that name in the administration panel",
           })}
           error={
             errors.displayName
               ? formatMessage({
                   id: getTrad(
-                    "Settings.locales.modal.locales.displayName.error"
+                    "Settings.variations.modal.variations.displayName.error"
                   ),
                   defaultMessage:
-                    "The locale display name can only be less than 50 characters.",
+                    "The variation display name can only be less than 50 characters.",
                 })
               : undefined
           }
@@ -47,24 +46,24 @@ const BaseForm = () => {
         <TextInput
           name="slug"
           label={formatMessage({
-            id: getTrad("Settings.locales.modal.locales.displayName"),
-            defaultMessage: "Locale display name",
+            id: getTrad("Settings.variations.modal.variations.displayName"),
+            defaultMessage: "Variation display name",
           })}
           hint={formatMessage({
             id: getTrad(
-              "Settings.locales.modal.locales.displayName.description"
+              "Settings.variations.modal.variations.displayName.description"
             ),
             defaultMessage:
-              "Locale will be displayed under that name in the administration panel",
+              "Variation will be displayed under that name in the administration panel",
           })}
           error={
             errors.displayName
               ? formatMessage({
                   id: getTrad(
-                    "Settings.locales.modal.locales.displayName.error"
+                    "Settings.variations.modal.variations.displayName.error"
                   ),
                   defaultMessage:
-                    "The locale display name can only be less than 50 characters.",
+                    "The variation display name can only be less than 50 characters.",
                 })
               : undefined
           }
@@ -79,7 +78,7 @@ const BaseForm = () => {
 export default BaseForm;
 
 BaseForm.propTypes = {
-  locale: PropTypes.shape({
+  variation: PropTypes.shape({
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     slug: PropTypes.string.isRequired,

@@ -1,27 +1,27 @@
 'use strict';
 
 const {
-  assignDefaultLocale,
-  syncLocalizations,
-  syncNonLocalizedAttributes,
-} = require('../localizations')();
+  assignDefaultVariation,
+  syncPersonalizations,
+  syncNonPersonalizedAttributes,
+} = require('../personalizations')();
 
-const locales = require('../locales')();
+const variations = require('../variations')();
 const contentTypes = require('../content-types')();
 
 const model = {
   uid: 'test-model',
   pluginOptions: {
-    i18n: {
-      localized: true,
+    personalization: {
+      personalized: true,
     },
   },
   attributes: {
     title: {
       type: 'string',
       pluginOptions: {
-        i18n: {
-          localized: true,
+        personalization: {
+          personalized: true,
         },
       },
     },
@@ -31,27 +31,27 @@ const model = {
   },
 };
 
-const allLocalizedModel = {
+const allPersonalizedModel = {
   uid: 'test-model',
   pluginOptions: {
-    i18n: {
-      localized: true,
+    personalization: {
+      personalized: true,
     },
   },
   attributes: {
     title: {
       type: 'string',
       pluginOptions: {
-        i18n: {
-          localized: true,
+        personalization: {
+          personalized: true,
         },
       },
     },
     stars: {
       type: 'integer',
       pluginOptions: {
-        i18n: {
-          localized: true,
+        personalization: {
+          personalized: true,
         },
       },
     },
@@ -61,9 +61,9 @@ const allLocalizedModel = {
 const setGlobalStrapi = () => {
   global.strapi = {
     plugins: {
-      i18n: {
+      personalization: {
         services: {
-          locales,
+          variations,
           'content-types': contentTypes,
         },
       },
@@ -71,33 +71,33 @@ const setGlobalStrapi = () => {
   };
 };
 
-describe('localizations service', () => {
-  describe('assignDefaultLocale', () => {
-    test('Does not change the input if locale is already defined', async () => {
+describe('personalizations service', () => {
+  describe('assignDefaultVariation', () => {
+    test('Does not change the input if variation is already defined', async () => {
       setGlobalStrapi();
-      const input = { locale: 'myLocale' };
-      await assignDefaultLocale(input);
+      const input = { variation: 'myVariation' };
+      await assignDefaultVariation(input);
 
-      expect(input).toStrictEqual({ locale: 'myLocale' });
+      expect(input).toStrictEqual({ variation: 'myVariation' });
     });
 
-    test('Use default locale to set the locale on the input data', async () => {
+    test('Use default variation to set the locale on the input data', async () => {
       setGlobalStrapi();
 
-      const getDefaultLocaleMock = jest.fn(() => 'defaultLocale');
+      const getDefaultVariationMock = jest.fn(() => 'defaultLocale');
 
-      global.strapi.plugins.i18n.services.locales.getDefaultLocale = getDefaultLocaleMock;
+      global.strapi.plugins.personalization.services.variations.getDefaultVariation = getDefaultLocaleMock;
 
       const input = {};
-      await assignDefaultLocale(input);
+      await assignDefaultVariation(input);
 
-      expect(input).toStrictEqual({ locale: 'defaultLocale' });
-      expect(getDefaultLocaleMock).toHaveBeenCalled();
+      expect(input).toStrictEqual({ variation: 'defaultVariation' });
+      expect(getDefaultVariationMock).toHaveBeenCalled();
     });
   });
 
-  describe('syncLocalizations', () => {
-    test('Updates every other localizations with correct ids', async () => {
+  describe('syncPersonalizations', () => {
+    test('Updates every other personalizations with correct ids', async () => {
       setGlobalStrapi();
 
       const update = jest.fn();
@@ -105,26 +105,26 @@ describe('localizations service', () => {
         return { update };
       };
 
-      const localizations = [{ id: 2 }, { id: 3 }];
-      const entry = { id: 1, locale: 'test', localizations };
+      const personalizations = [{ id: 2 }, { id: 3 }];
+      const entry = { id: 1, variation: 'test', personalizations };
 
-      await syncLocalizations(entry, { model });
+      await syncPersonalizations(entry, { model });
 
-      expect(update).toHaveBeenCalledTimes(localizations.length);
+      expect(update).toHaveBeenCalledTimes(personalizations.length);
       expect(update).toHaveBeenNthCalledWith(1, {
         where: { id: 2 },
-        data: { localizations: [1, 3] },
+        data: { personalizations: [1, 3] },
       });
 
       expect(update).toHaveBeenNthCalledWith(2, {
         where: { id: 3 },
-        data: { localizations: [1, 2] },
+        data: { personalizations: [1, 2] },
       });
     });
   });
 
-  describe('syncNonLocalizedAttributes', () => {
-    test('Does nothing if no localizations set', async () => {
+  describe('syncNonPersonalizedAttributes', () => {
+    test('Does nothing if no personalizations set', async () => {
       setGlobalStrapi();
 
       const update = jest.fn();
@@ -132,14 +132,14 @@ describe('localizations service', () => {
         return { update };
       };
 
-      const entry = { id: 1, locale: 'test' };
+      const entry = { id: 1, variation: 'test' };
 
-      await syncNonLocalizedAttributes(entry, { model });
+      await syncNonPersonalizedAttributes(entry, { model });
 
       expect(update).not.toHaveBeenCalled();
     });
 
-    test('Does not update the current locale', async () => {
+    test('Does not update the current variation', async () => {
       setGlobalStrapi();
 
       const update = jest.fn();
@@ -147,14 +147,14 @@ describe('localizations service', () => {
         return { update };
       };
 
-      const entry = { id: 1, locale: 'test', localizations: [] };
+      const entry = { id: 1, variation: 'test', personalizations: [] };
 
-      await syncNonLocalizedAttributes(entry, { model });
+      await syncNonPersonalizedAttributes(entry, { model });
 
       expect(update).not.toHaveBeenCalled();
     });
 
-    test('Does not update if all the fields are localized', async () => {
+    test('Does not update if all the fields are personalized', async () => {
       setGlobalStrapi();
 
       const update = jest.fn();
@@ -162,14 +162,14 @@ describe('localizations service', () => {
         return { update };
       };
 
-      const entry = { id: 1, locale: 'test', localizations: [] };
+      const entry = { id: 1, variation: 'test', personalizations: [] };
 
-      await syncNonLocalizedAttributes(entry, { model: allLocalizedModel });
+      await syncNonPersonalizedAttributes(entry, { model: allLocalizedModel });
 
       expect(update).not.toHaveBeenCalled();
     });
 
-    test('Updates locales with non localized fields only', async () => {
+    test('Updates variations with non personalized fields only', async () => {
       setGlobalStrapi();
 
       const update = jest.fn();
@@ -177,13 +177,13 @@ describe('localizations service', () => {
 
       const entry = {
         id: 1,
-        locale: 'test',
-        title: 'Localized',
+        variation: 'test',
+        title: 'Personalized',
         stars: 1,
-        localizations: [{ id: 2, locale: 'fr' }],
+        personalizations: [{ id: 2, variation: 'fr' }],
       };
 
-      await syncNonLocalizedAttributes(entry, { model });
+      await syncNonPersonalizedAttributes(entry, { model });
 
       expect(update).toHaveBeenCalledTimes(1);
       expect(update).toHaveBeenCalledWith(model.uid, 2, { data: { stars: 1 } });

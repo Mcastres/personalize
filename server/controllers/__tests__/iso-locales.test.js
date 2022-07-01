@@ -1,17 +1,17 @@
 'use strict';
 
-const { listIsoLocales } = require('../iso-locales');
+const { listIsoVariations } = require('../iso-variations');
 
-describe('ISO locales', () => {
-  test('listIsoLocales', () => {
-    const isoLocales = [{ code: 'af', name: 'Afrikaans (af)' }];
-    const getIsoLocales = jest.fn(() => isoLocales);
+describe('ISO variations', () => {
+  test('listIsoVariations', () => {
+    const isoVariations = [{ code: 'af', name: 'Afrikaans (af)' }];
+    const getIsoVariations = jest.fn(() => isoLocales);
     global.strapi = {
       plugins: {
-        i18n: {
+        personalization: {
           services: {
-            'iso-locales': {
-              getIsoLocales,
+            'iso-variations': {
+              getIsoVariations,
             },
           },
         },
@@ -19,8 +19,8 @@ describe('ISO locales', () => {
     };
 
     const ctx = {};
-    listIsoLocales(ctx);
+    listIsoVariations(ctx);
 
-    expect(ctx.body).toMatchObject(isoLocales);
+    expect(ctx.body).toMatchObject(isoVariations);
   });
 });

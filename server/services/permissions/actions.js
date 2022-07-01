@@ -6,73 +6,73 @@ const { getService } = require('../../utils');
 const actions = ['create', 'read', 'update', 'delete'].map(uid => ({
   section: 'settings',
   category: 'Internationalization',
-  subCategory: 'Locales',
-  pluginName: 'i18n',
+  subCategory: 'Variations',
+  pluginName: 'personalization',
   displayName: capitalize(uid),
-  uid: `locale.${uid}`,
+  uid: `variation.${uid}`,
 }));
 
-const addLocalesPropertyIfNeeded = ({ value: action }) => {
+const addVariationsPropertyIfNeeded = ({ value: action }) => {
   const {
     section,
     options: { applyToProperties },
   } = action;
 
-  // Only add the locales property to contentTypes' actions
+  // Only add the variations property to contentTypes' actions
   if (section !== 'contentTypes') {
     return;
   }
 
-  // If the 'locales' property is already declared within the applyToProperties array, then ignore the next steps
-  if (isArray(applyToProperties) && applyToProperties.includes('locales')) {
+  // If the 'variations' property is already declared within the applyToProperties array, then ignore the next steps
+  if (isArray(applyToProperties) && applyToProperties.includes('variations')) {
     return;
   }
 
-  // Add the 'locales' property to the applyToProperties array (create it if necessary)
+  // Add the 'variations' property to the applyToProperties array (create it if necessary)
   action.options.applyToProperties = isArray(applyToProperties)
-    ? applyToProperties.concat('locales')
-    : ['locales'];
+    ? applyToProperties.concat('variations')
+    : ['variations'];
 };
 
-const shouldApplyLocalesPropertyToSubject = ({ property, subject }) => {
-  if (property === 'locales') {
+const shouldApplyVariationsPropertyToSubject = ({ property, subject }) => {
+  if (property === 'variations') {
     const model = strapi.getModel(subject);
 
-    return getService('content-types').isLocalizedContentType(model);
+    return getService('content-types').isPersonalizedContentType(model);
   }
 
   return true;
 };
 
-const addAllLocalesToPermissions = async permissions => {
+const addAllVariationsToPermissions = async permissions => {
   const { actionProvider } = strapi.admin.services.permission;
-  const { find: findAllLocales } = getService('locales');
+  const { find: findAllVariations } = getService('variations');
 
-  const allLocales = await findAllLocales();
-  const allLocalesSlug = allLocales.map(prop('slug'));
+  const allVariations = await findAllVariations();
+  const allVariationsSlug = allVariations.map(prop('slug'));
 
   return Promise.all(
     permissions.map(async permission => {
       const { action, subject } = permission;
 
-      const appliesToLocalesProperty = await actionProvider.appliesToProperty(
-        'locales',
+      const appliesToVariationsProperty = await actionProvider.appliesToProperty(
+        'variations',
         action,
         subject
       );
 
-      if (!appliesToLocalesProperty) {
+      if (!appliesToVariationsProperty) {
         return permission;
       }
 
       const oldPermissionProperties = getOr({}, 'properties', permission);
 
-      return { ...permission, properties: { ...oldPermissionProperties, locales: allLocalesSlug } };
+      return { ...permission, properties: { ...oldPermissionProperties, variations: allVariationsSlug } };
     })
   );
 };
 
-const syncSuperAdminPermissionsWithLocales = async () => {
+const syncSuperAdminPermissionsWithVariations = async () => {
   const roleService = strapi.admin.services.role;
   const permissionService = strapi.admin.services.permission;
 
@@ -90,39 +90,39 @@ const syncSuperAdminPermissionsWithLocales = async () => {
     },
   });
 
-  const newSuperAdminPermissions = await addAllLocalesToPermissions(superAdminPermissions);
+  const newSuperAdminPermissions = await addAllVariationsToPermissions(superAdminPermissions);
 
   await roleService.assignPermissions(superAdminRole.id, newSuperAdminPermissions);
 };
 
-const registerI18nActions = async () => {
+const registerPersonalizationActions = async () => {
   const { actionProvider } = strapi.admin.services.permission;
 
   await actionProvider.registerMany(actions);
 };
 
-const registerI18nActionsHooks = () => {
+const registerPersonalizationActionsHooks = () => {
   const { actionProvider } = strapi.admin.services.permission;
   const { hooks } = strapi.admin.services.role;
 
-  actionProvider.hooks.appliesPropertyToSubject.register(shouldApplyLocalesPropertyToSubject);
-  hooks.willResetSuperAdminPermissions.register(addAllLocalesToPermissions);
+  actionProvider.hooks.appliesPropertyToSubject.register(shouldApplyVariationsPropertyToSubject);
+  hooks.willResetSuperAdminPermissions.register(addAllVariationsToPermissions);
 };
 
 const updateActionsProperties = () => {
   const { actionProvider } = strapi.admin.services.permission;
 
   // Register the transformation for every new action
-  actionProvider.hooks.willRegister.register(addLocalesPropertyIfNeeded);
+  actionProvider.hooks.willRegister.register(addVariationsPropertyIfNeeded);
 
   // Handle already registered actions
-  actionProvider.values().forEach(action => addLocalesPropertyIfNeeded({ value: action }));
+  actionProvider.values().forEach(action => addVariationsPropertyIfNeeded({ value: action }));
 };
 
 module.exports = {
   actions,
-  registerI18nActions,
-  registerI18nActionsHooks,
+  registerPersonalizationActions,
+  registerPersonalizationActionsHooks,
   updateActionsProperties,
-  syncSuperAdminPermissionsWithLocales,
+  syncSuperAdminPermissionsWithVariations,
 };

@@ -17,20 +17,20 @@ const BaseForm = () => {
         <TextInput
           name="name"
           label={formatMessage({
-            id: getTrad("Settings.locales.modal.locales.namme"),
-            defaultMessage: "Locale display name",
+            id: getTrad("Settings.variations.modal.variations.namme"),
+            defaultMessage: "Variation display name",
           })}
           hint={formatMessage({
-            id: getTrad("Settings.locales.modal.locales.namme.description"),
+            id: getTrad("Settings.variations.modal.variations.namme.description"),
             defaultMessage:
-              "Locale will be displayed under that name in the administration panel",
+              "Variation will be displayed under that name in the administration panel",
           })}
           error={
             errors.namme
               ? formatMessage({
-                  id: getTrad("Settings.locales.modal.locales.namme.error"),
+                  id: getTrad("Settings.variations.modal.variations.namme.error"),
                   defaultMessage:
-                    "The locale display name can only be less than 50 characters.",
+                    "The variation display name can only be less than 50 characters.",
                 })
               : undefined
           }
@@ -42,20 +42,20 @@ const BaseForm = () => {
         <TextInput
           name="slug"
           label={formatMessage({
-            id: getTrad("Settings.locales.modal.locales.name"),
-            defaultMessage: "Locale display name",
+            id: getTrad("Settings.variations.modal.variations.name"),
+            defaultMessage: "Variation display name",
           })}
           hint={formatMessage({
-            id: getTrad("Settings.locales.modal.locales.namme.description"),
+            id: getTrad("Settings.variations.modal.variations.namme.description"),
             defaultMessage:
-              "Locale will be displayed under that name in the administration panel",
+              "Variation will be displayed under that name in the administration panel",
           })}
           error={
             errors.namme
               ? formatMessage({
-                  id: getTrad("Settings.locales.modal.locales.namme.error"),
+                  id: getTrad("Settings.variations.modal.variations.namme.error"),
                   defaultMessage:
-                    "The locale display name can only be less than 50 characters.",
+                    "The variation display name can only be less than 50 characters.",
                 })
               : undefined
           }

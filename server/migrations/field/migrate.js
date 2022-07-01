@@ -2,16 +2,16 @@
 
 const { pick, prop } = require('lodash/fp');
 const { getService } = require('../../utils');
-const { shouldBeProcessed, getUpdatesInfo, getSortedLocales } = require('./utils');
+const { shouldBeProcessed, getUpdatesInfo, getSortedVariations } = require('./utils');
 
 const BATCH_SIZE = 1000;
 
 const migrateBatch = async (entries, { model, attributesToMigrate }, { transacting }) => {
-  const { copyNonLocalizedAttributes } = getService('content-types');
+  const { copyNonPersonalizedAttributes } = getService('content-types');
 
   const updatePromises = entries.map(entity => {
-    const updateValues = pick(attributesToMigrate, copyNonLocalizedAttributes(model, entity));
-    const entriesIdsToUpdate = entity.localizations.map(prop('id'));
+    const updateValues = pick(attributesToMigrate, copyNonPersonalizedAttributes(model, entity));
+    const entriesIdsToUpdate = entity.personalizations.map(prop('id'));
     return Promise.all(
       entriesIdsToUpdate.map(id =>
         strapi.query(model.uid).update({ id }, updateValues, { transacting })
@@ -23,16 +23,16 @@ const migrateBatch = async (entries, { model, attributesToMigrate }, { transacti
 };
 
 const migrate = async ({ model, attributesToMigrate }, { migrateFn, transacting } = {}) => {
-  const locales = await getSortedLocales({ transacting });
-  const processedLocaleSlugs = [];
-  for (const locale of locales) {
+  const variations = await getSortedVariations({ transacting });
+  const processedVariationSlugs = [];
+  for (const variation of variations) {
     let offset = 0;
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const entries = await strapi
         .query(model.uid)
-        .find({ locale, _start: offset, _limit: BATCH_SIZE }, null, { transacting });
-      const entriesToProcess = entries.filter(shouldBeProcessed(processedLocaleSlugs));
+        .find({ variation, _start: offset, _limit: BATCH_SIZE }, null, { transacting });
+      const entriesToProcess = entries.filter(shouldBeProcessed(processedVariationSlugs));
 
       if (migrateFn) {
         const updatesInfo = getUpdatesInfo({ entriesToProcess, attributesToMigrate });
@@ -46,7 +46,7 @@ const migrate = async ({ model, attributesToMigrate }, { migrateFn, transacting 
       }
       offset += BATCH_SIZE;
     }
-    processedLocaleSlugs.push(locale);
+    processedVariationSlugs.push(variation);
   }
 };
 

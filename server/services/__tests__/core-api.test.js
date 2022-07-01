@@ -30,7 +30,7 @@ describe('Core API', () => {
       });
     });
 
-    test('sanitizeInput excludes locale & localizations', () => {
+    test('sanitizeInput excludes variation & personalizations', () => {
       const contentType = {
         attributes: {
           title: {
@@ -40,11 +40,11 @@ describe('Core API', () => {
             type: 'string',
             writable: false,
           },
-          locale: {
+          variation: {
             type: 'string',
             writable: true,
           },
-          localizations: {
+          personalizations: {
             type: 'string',
             writable: true,
           },
@@ -56,8 +56,8 @@ describe('Core API', () => {
       const input = {
         title: 'test',
         nonWritables: 'test',
-        locale: 'FR',
-        localizations: [1, 2],
+        variation: 'FR',
+        personalizations: [1, 2],
       };
 
       const output = sanitizeInput(input);

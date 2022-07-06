@@ -66,13 +66,13 @@ const getAndValidateRelatedEntity = async (relatedEntityId, model, variation) =>
     throw new ApplicationError("The related entity doesn't exist");
   }
 
-  if (
-    relatedEntity &&
-    (relatedEntity.variation === variation ||
-      relatedEntity.personalizations.map(prop('variation')).includes(variation))
-  ) {
-    throw new ApplicationError('The entity already exists in this variation');
-  }
+  // if (
+  //   relatedEntity &&
+  //   (relatedEntity.variation === variation ||
+  //     relatedEntity.personalizations.map(prop('variation')).includes(variation))
+  // ) {
+  //   throw new ApplicationError('The entity already exists in this variation');
+  // }
 
   return relatedEntity;
 };

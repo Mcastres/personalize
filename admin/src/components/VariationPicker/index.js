@@ -19,6 +19,7 @@ const VariationPicker = () => {
   const {
     params: { slug },
   } = useRouteMatch('/content-manager/collectionType/:slug');
+  
   const isFieldPersonalized = useHasPersonalization();
   const { createPermissions, readPermissions } = useContentTypePermissions(slug);
 

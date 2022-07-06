@@ -1,18 +1,20 @@
-'use strict';
+"use strict";
 
-const { has, get, omit, isArray } = require('lodash/fp');
-const { ApplicationError } = require('@strapi/utils').errors;
-const { getService } = require('../utils');
+const { has, get, omit, isArray } = require("lodash/fp");
+const { ApplicationError } = require("@strapi/utils").errors;
+const { getService } = require("../utils");
 
-const VARIATION_QUERY_FILTER = 'variation';
-const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
-const BULK_ACTIONS = ['delete'];
+const VARIATION_QUERY_FILTER = "variation";
+const SINGLE_ENTRY_ACTIONS = ["findOne", "update", "delete"];
+const BULK_ACTIONS = ["delete"];
 
 const paramsContain = (key, params) => {
   return (
     has(key, params.filters) ||
-    (isArray(params.filters) && params.filters.some(clause => has(key, clause))) ||
-    (isArray(get('$and', params.filters)) && params.filters.$and.some(clause => has(key, clause)))
+    (isArray(params.filters) &&
+      params.filters.some((clause) => has(key, clause))) ||
+    (isArray(get("$and", params.filters)) &&
+      params.filters.$and.some((clause) => has(key, clause)))
   );
 };
 
@@ -24,42 +26,74 @@ const paramsContain = (key, params) => {
 const wrapParams = async (params = {}, ctx = {}) => {
   const { action } = ctx;
 
+  let filters = [{ variation: params[VARIATION_QUERY_FILTER] }];
+
   if (has(VARIATION_QUERY_FILTER, params)) {
-    if (params[VARIATION_QUERY_FILTER] === 'all') {
+    if (params[VARIATION_QUERY_FILTER] === "all") {
       return omit(VARIATION_QUERY_FILTER, params);
+    }
+
+    if (has("locale", params)) {
+      filters = [
+        { variation: params[VARIATION_QUERY_FILTER] },
+        { locale: params["locale"] },
+      ];
+      return {
+        ...omit(VARIATION_QUERY_FILTER, params),
+        filters: {
+          $and: filters.concat(params.filters || []),
+        },
+      };
     }
 
     return {
       ...omit(VARIATION_QUERY_FILTER, params),
       filters: {
-        $and: [{ variation: params[VARIATION_QUERY_FILTER] }].concat(params.filters || []),
+        $and: filters.concat(params.filters || []),
       },
     };
   }
 
-  const entityDefinedById = paramsContain('id', params) && SINGLE_ENTRY_ACTIONS.includes(action);
-  const entitiesDefinedByIds = paramsContain('id.$in', params) && BULK_ACTIONS.includes(action);
+  const entityDefinedById =
+    paramsContain("id", params) && SINGLE_ENTRY_ACTIONS.includes(action);
+  const entitiesDefinedByIds =
+    paramsContain("id.$in", params) && BULK_ACTIONS.includes(action);
 
   if (entityDefinedById || entitiesDefinedByIds) {
     return params;
   }
 
-  const { getDefaultVariation } = getService('variations');
+  const { getDefaultVariation } = getService("variations");
 
-  return {
-    ...params,
-    filters: {
-      $and: [{ variation: await getDefaultVariation() }].concat(params.filters || []),
-    },
-  };
+  try {
+    const { getDefaultLocale } = strapi.plugin("i18n").service("locales");
+    return {
+      ...params,
+      filters: {
+        $and: [
+          { variation: await getDefaultVariation() },
+          { locale: await getDefaultLocale() },
+        ].concat(params.filters || []),
+      },
+    };
+  } catch (error) {
+    return {
+      ...params,
+      filters: {
+        $and: [{ variation: await getDefaultVariation() }].concat(
+          params.filters || []
+        ),
+      },
+    };
+  }
 };
 
 /**
  * Assigns a valid variation or the default one if not define
  * @param {object} data
  */
-const assignValidVariation = async data => {
-  const { getValidVariation } = getService('content-types');
+const assignValidVariation = async (data) => {
+  const { getValidVariation } = getService("content-types");
 
   if (!data) {
     return;
@@ -76,7 +110,7 @@ const assignValidVariation = async data => {
  * Decorates the entity service with Personalization business logic
  * @param {object} service - entity service
  */
-const decorator = service => ({
+const decorator = (service) => ({
   /**
    * Wraps query options. In particular will add default variation to query params
    * @param {object} opts - Query options object (params, data, files, populate)
@@ -88,12 +122,14 @@ const decorator = service => ({
 
     const model = strapi.getModel(ctx.uid);
 
-    const { isPersonalizedContentType } = getService('content-types');
+    const { isPersonalizedContentType } = getService("content-types");
 
     if (!isPersonalizedContentType(model)) {
       return wrappedParams;
     }
 
+    // const res = await wrapParams(params, ctx);
+    // console.log(res.filters);
     return wrapParams(params, ctx);
   },
 
@@ -105,8 +141,9 @@ const decorator = service => ({
   async create(uid, opts = {}) {
     const model = strapi.getModel(uid);
 
-    const { syncPersonalizations, syncNonPersonalizedAttributes } = getService('personalizations');
-    const { isPersonalizedContentType } = getService('content-types');
+    const { syncPersonalizations, syncNonPersonalizedAttributes } =
+      getService("personalizations");
+    const { isPersonalizedContentType } = getService("content-types");
 
     if (!isPersonalizedContentType(model)) {
       return service.create.call(this, uid, opts);
@@ -131,8 +168,8 @@ const decorator = service => ({
   async update(uid, entityId, opts = {}) {
     const model = strapi.getModel(uid);
 
-    const { syncNonPersonalizedAttributes } = getService('personalizations');
-    const { isPersonalizedContentType } = getService('content-types');
+    const { syncNonPersonalizedAttributes } = getService("personalizations");
+    const { isPersonalizedContentType } = getService("content-types");
 
     if (!isPersonalizedContentType(model)) {
       return service.update.call(this, uid, entityId, opts);
@@ -142,7 +179,7 @@ const decorator = service => ({
 
     const entry = await service.update.call(this, uid, entityId, {
       ...restOptions,
-      data: omit(['variation', 'personalizations'], data),
+      data: omit(["variation", "personalizations"], data),
     });
 
     await syncNonPersonalizedAttributes(entry, { model });

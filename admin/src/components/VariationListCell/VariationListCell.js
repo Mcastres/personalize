@@ -113,7 +113,7 @@ const VariationListCell = ({
       <Tooltip
         label={formatMessage({
           id: getTrad("CMListView.popover.display-variations.label"),
-          defaultMessage: "Display translated variations",
+          defaultMessage: "Display variations",
         })}
       >
         <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>

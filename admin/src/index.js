@@ -52,10 +52,10 @@ export default {
     app.addSettingsLink('global', {
       intlLabel: {
         id: getTrad('plugin.name'),
-        defaultMessage: 'Internationalization',
+        defaultMessage: 'Personalization',
       },
-      id: 'internationalization',
-      to: '/settings/internationalization',
+      id: 'personalization',
+      to: '/settings/personalization',
 
       Component: async () => {
         const component = await import(

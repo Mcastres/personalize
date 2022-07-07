@@ -4,6 +4,7 @@ const { has, get, omit, isArray } = require("lodash/fp");
 const { ApplicationError } = require("@strapi/utils").errors;
 const { getService } = require("../utils");
 
+const LOCALE_QUERY_FILTER = "locale";
 const VARIATION_QUERY_FILTER = "variation";
 const SINGLE_ENTRY_ACTIONS = ["findOne", "update", "delete"];
 const BULK_ACTIONS = ["delete"];
@@ -26,30 +27,98 @@ const paramsContain = (key, params) => {
 const wrapParams = async (params = {}, ctx = {}) => {
   const { action } = ctx;
 
+  // Get default locale
+  const getDefaultLocale = strapi
+    .plugin("i18n")
+    ?.service("locales").getDefaultLocale;
+
+  let defaultLocale = null;
+  if (getDefaultLocale) {
+    defaultLocale = await getDefaultLocale();
+  }
+
   let filters = [{ variation: params[VARIATION_QUERY_FILTER] }];
 
+  // variation=...
   if (has(VARIATION_QUERY_FILTER, params)) {
+    // variation=all
     if (params[VARIATION_QUERY_FILTER] === "all") {
+      // variation=all&locale=...
+      if (has(LOCALE_QUERY_FILTER, params)) {
+        // variation=all&locale=all
+        if (params[LOCALE_QUERY_FILTER] === "all") {
+          return {
+            ...omit([LOCALE_QUERY_FILTER, VARIATION_QUERY_FILTER], params),
+          };
+        }
+        return {
+          ...omit([VARIATION_QUERY_FILTER, LOCALE_QUERY_FILTER], params),
+          filters: {
+            $and: [{ locale: params[LOCALE_QUERY_FILTER] }].concat(
+              params.filters || []
+            ),
+          },
+        };
+      }
+      else if (defaultLocale) {
+        return {
+          ...omit(VARIATION_QUERY_FILTER, params),
+          filters: {
+            $and: [{ locale: defaultLocale }].concat(params.filters || []),
+          },
+        };
+      }
       return omit(VARIATION_QUERY_FILTER, params);
     }
 
-    if (has("locale", params)) {
+    // If locale is also in params
+    if (has(LOCALE_QUERY_FILTER, params)) {
+      // locale=all
+      if (params[LOCALE_QUERY_FILTER] === "all") {
+        // locale=all&variation=...
+        if (has(VARIATION_QUERY_FILTER, params)) {
+          return {
+            ...omit([LOCALE_QUERY_FILTER, VARIATION_QUERY_FILTER], params),
+            filters: {
+              $and: [{ variation: params[VARIATION_QUERY_FILTER] }].concat(
+                params.filters || []
+              ),
+            },
+          };
+        }
+        // locale=all
+        return {
+          ...omit(LOCALE_QUERY_FILTER, params),
+          filters: {
+            $and: [{ variation: await getDefaultVariation() }].concat(
+              params.filters || []
+            ),
+          },
+        };
+      }
+
       filters = [
         { variation: params[VARIATION_QUERY_FILTER] },
-        { locale: params["locale"] },
+        { locale: params[LOCALE_QUERY_FILTER] },
       ];
+
+      // locale=...&variation=...
       return {
-        ...omit(VARIATION_QUERY_FILTER, params),
+        ...omit([VARIATION_QUERY_FILTER, LOCALE_QUERY_FILTER], params),
         filters: {
           $and: filters.concat(params.filters || []),
         },
       };
     }
 
+    // variation=... with default locale
     return {
       ...omit(VARIATION_QUERY_FILTER, params),
       filters: {
-        $and: filters.concat(params.filters || []),
+        $and: [
+          { variation: params[VARIATION_QUERY_FILTER] },
+          { locale: defaultLocale },
+        ].concat(params.filters || []),
       },
     };
   }
@@ -65,24 +134,26 @@ const wrapParams = async (params = {}, ctx = {}) => {
 
   const { getDefaultVariation } = getService("variations");
 
-  try {
-    const { getDefaultLocale } = strapi.plugin("i18n").service("locales");
+  if (has(LOCALE_QUERY_FILTER, params)) {
     return {
       ...params,
       filters: {
         $and: [
           { variation: await getDefaultVariation() },
-          { locale: await getDefaultLocale() },
+          { locale: params[LOCALE_QUERY_FILTER] },
         ].concat(params.filters || []),
       },
     };
-  } catch (error) {
+  } else {
     return {
       ...params,
       filters: {
-        $and: [{ variation: await getDefaultVariation() }].concat(
-          params.filters || []
-        ),
+        $and: [
+          { variation: await getDefaultVariation() },
+          {
+            locale: defaultLocale,
+          },
+        ].concat(params.filters || []),
       },
     };
   }
@@ -128,8 +199,6 @@ const decorator = (service) => ({
       return wrappedParams;
     }
 
-    // const res = await wrapParams(params, ctx);
-    // console.log(res.filters);
     return wrapParams(params, ctx);
   },
 

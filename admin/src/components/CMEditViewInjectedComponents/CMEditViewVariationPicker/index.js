@@ -1,18 +1,20 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import get from 'lodash/get';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
-import { stringify } from 'qs';
-import { getTrad } from '../../../utils';
-import { createVariationsOption } from './utils';
-import CMEditViewCopyVariation from '../CMEditViewCopyVariation';
-import Bullet from './Bullet';
+import React from "react";
+import PropTypes from "prop-types";
+import get from "lodash/get";
+import { Box } from "@strapi/design-system/Box";
+import { Divider } from "@strapi/design-system/Divider";
+import { Select, Option } from "@strapi/design-system/Select";
+import { Typography } from "@strapi/design-system/Typography";
+import { Stack } from "@strapi/design-system/Stack";
+import { useIntl } from "react-intl";
+import { useHistory } from "react-router-dom";
+import { stringify } from "qs";
+import { getTrad } from "../../../utils";
+import { createVariationsOption } from "./utils";
+import CMEditViewCopyVariation from "../CMEditViewCopyVariation";
+import Bullet from "./Bullet";
+
+import useGetExistingVariation from "../../../hooks/useGetExistingVariation";
 
 const CMEditViewVariationPicker = ({
   appVariations,
@@ -29,16 +31,27 @@ const CMEditViewVariationPicker = ({
 }) => {
   const { formatMessage } = useIntl();
 
-  const currentVariation = get(query, 'plugins.personalization.variation', false);
+  const currentVariation = get(
+    query,
+    "plugins.personalization.variation",
+    false
+  );
 
   const { push } = useHistory();
 
-  const handleChange = value => {
+  const handleChange = (useGetExistingVariation) => async (value) => {
+    console.log(value);
     if (value === currentVariation) {
       return;
     }
 
-    const nextVariation = options.find(option => {
+    const data = await useGetExistingVariation(
+      slug,
+      query.plugins.i18n.locale,
+      query.plugins.personalization.variation
+    );
+
+    const nextVariation = options.find((option) => {
       return option.value === value;
     });
 
@@ -47,13 +60,26 @@ const CMEditViewVariationPicker = ({
     let defaultParams = {
       plugins: {
         ...query.plugins,
-        personalization: { ...query.plugins.personalization, variation: value },
+        personalization: { variation: data?.results[0]?.variation },
+        i18n: { locale: data?.results[0]?.locale },
       },
     };
 
+    if (data?.pagination) {
+      if (data?.results[0]?.localizations.length > 0) {
+        defaultParams.plugins.i18n.relatedEntityId = data?.results[0]?.id;
+      } else {
+        defaultParams.plugins.personalization.relatedEntityId =
+          data?.results[0]?.id;
+      }
+    }
+
     if (currentEntityId) {
       defaultParams.plugins.personalization.relatedEntityId = currentEntityId;
+      // delete defaultParams.plugins.i18n.relatedEntityId;
     }
+
+    console.log(defaultParams)
 
     if (isSingleType) {
       setQuery(defaultParams);
@@ -61,7 +87,7 @@ const CMEditViewVariationPicker = ({
       return;
     }
 
-    if (status === 'did-not-create-variation') {
+    if (status === "did-not-create-variation") {
       push({
         pathname: `/content-manager/collectionType/${slug}/create`,
         search: stringify(defaultParams, { encode: false }),
@@ -76,25 +102,35 @@ const CMEditViewVariationPicker = ({
     });
   };
 
-  const options = createVariationsOption(appVariations, personalizations).filter(({ status, value }) => {
-
-    if (status === 'did-not-create-variation') {
-
+  const options = createVariationsOption(
+    appVariations,
+    personalizations
+  ).filter(({ status, value }) => {
+    if (status === "did-not-create-variation") {
       const tmp = createPermissions.find(({ properties }) =>
         get(properties, "variations", []).includes(value)
       );
-      return tmp
+      return tmp;
     }
 
-    return readPermissions.find(({ properties }) => get(properties, 'variations', []).includes(value));
+    return readPermissions.find(({ properties }) =>
+      get(properties, "variations", []).includes(value)
+    );
   });
 
-  const filteredOptions = options.filter(({ value }) => value !== currentVariation);
-  const currentVariationObject = appVariations.find(({ slug }) => slug === currentVariation);
+  const filteredOptions = options.filter(
+    ({ value }) => value !== currentVariation
+  );
+  const currentVariationObject = appVariations.find(
+    ({ slug }) => slug === currentVariation
+  );
 
   const value = options.find(({ value }) => {
     return value === currentVariation;
-  }) || { value: currentVariationObject.slug, label: currentVariationObject.name };
+  }) || {
+    value: currentVariationObject.slug,
+    label: currentVariationObject.name,
+  };
 
   if (!currentVariation) {
     return null;
@@ -103,7 +139,10 @@ const CMEditViewVariationPicker = ({
   return (
     <Box paddingTop={6}>
       <Typography variant="sigma" textColor="neutral600">
-        {formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Internationalization' })}
+        {formatMessage({
+          id: getTrad("plugin.name"),
+          defaultMessage: "Internationalization",
+        })}
       </Typography>
       <Box paddingTop={2} paddingBottom={6}>
         <Divider />
@@ -112,24 +151,32 @@ const CMEditViewVariationPicker = ({
         <Box>
           <Select
             label={formatMessage({
-              id: getTrad('Settings.variations.modal.variations.label'),
+              id: getTrad("Settings.variations.modal.variations.label"),
             })}
-            onChange={handleChange}
+            onChange={handleChange(useGetExistingVariation)}
             value={value?.value}
           >
             <Option
               value={value?.value}
               disabled
-              startIcon={hasDraftAndPublishEnabled ? <Bullet status={currentVariationStatus} /> : null}
+              startIcon={
+                hasDraftAndPublishEnabled ? (
+                  <Bullet status={currentVariationStatus} />
+                ) : null
+              }
             >
               {value?.label}
             </Option>
-            {filteredOptions.map(option => {
+            {filteredOptions.map((option) => {
               return (
                 <Option
                   key={option.value}
                   value={option.value}
-                  startIcon={hasDraftAndPublishEnabled ? <Bullet status={option.status} /> : null}
+                  startIcon={
+                    hasDraftAndPublishEnabled ? (
+                      <Bullet status={option.status} />
+                    ) : null
+                  }
                 >
                   {option.label}
                 </Option>
@@ -153,7 +200,7 @@ const CMEditViewVariationPicker = ({
 CMEditViewVariationPicker.defaultProps = {
   createPermissions: [],
   currentEntityId: null,
-  currentVariationStatus: 'did-not-create-variation',
+  currentVariationStatus: "did-not-create-variation",
   isSingleType: false,
   personalizations: [],
   query: {},

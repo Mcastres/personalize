@@ -14,7 +14,7 @@ const validateVariationCreation = async (ctx, next) => {
     isPersonalizedContentType,
     getAndValidateRelatedEntity,
     fillNonPersonalizedAttributes,
-  } = getService('content-types');
+  } = getService("content-types");
 
   const modelDef = strapi.getModel(model);
 
@@ -22,8 +22,10 @@ const validateVariationCreation = async (ctx, next) => {
     return next();
   }
 
-  const variation = get('plugins.personalization.variation', query);
-  const relatedEntityId = get('plugins.personalization.relatedEntityId', query);
+  const variation = get("plugins.personalization.variation", query);
+  const locale = get("plugins.i18n.locale", query);
+
+  const relatedEntityId = get("plugins.personalization.relatedEntityId", query);
   // cleanup to avoid creating duplicates in singletypes
   ctx.request.query = {};
 
@@ -37,8 +39,15 @@ const validateVariationCreation = async (ctx, next) => {
 
   body.variation = entityVariation;
 
-  if (modelDef.kind === 'singleType') {
-    const entity = await strapi.entityService.findMany(modelDef.uid, { variation: entityVariation });
+  // If a variation exists
+  if (locale) {
+    body.locale = locale;
+  }
+
+  if (modelDef.kind === "singleType") {
+    const entity = await strapi.entityService.findMany(modelDef.uid, {
+      variation: entityVariation,
+    });
 
     ctx.request.query.variation = body.variation;
 
@@ -50,7 +59,11 @@ const validateVariationCreation = async (ctx, next) => {
 
   let relatedEntity;
   try {
-    relatedEntity = await getAndValidateRelatedEntity(relatedEntityId, model, entityVariation);
+    relatedEntity = await getAndValidateRelatedEntity(
+      relatedEntityId,
+      model,
+      entityVariation
+    );
   } catch (e) {
     throw new ApplicationError(
       "The related entity doesn't exist or the entity already exists in this variation"

@@ -17,7 +17,9 @@ const sendDidInitializeEvent = async () => {
 const sendDidUpdatePersonalizationVariationsEvent = async () => {
   const numberOfVariations = await getService('variations').count();
 
-  await strapi.telemetry.send('didUpdatePersonalizationVariations', { numberOfVariation });
+  await strapi.telemetry.send("didUpdatePersonalizationVariations", {
+    numberOfVariations,
+  });
 };
 
 module.exports = () => ({

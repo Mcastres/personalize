@@ -21,14 +21,18 @@ const BaseForm = () => {
             defaultMessage: "Variation display name",
           })}
           hint={formatMessage({
-            id: getTrad("Settings.variations.modal.variations.namme.description"),
+            id: getTrad(
+              "Settings.variations.modal.variations.namme.description"
+            ),
             defaultMessage:
               "Variation will be displayed under that name in the administration panel",
           })}
           error={
             errors.namme
               ? formatMessage({
-                  id: getTrad("Settings.variations.modal.variations.namme.error"),
+                  id: getTrad(
+                    "Settings.variations.modal.variations.namme.error"
+                  ),
                   defaultMessage:
                     "The variation display name can only be less than 50 characters.",
                 })
@@ -42,20 +46,23 @@ const BaseForm = () => {
         <TextInput
           name="slug"
           label={formatMessage({
-            id: getTrad("Settings.variations.modal.variations.name"),
-            defaultMessage: "Variation display name",
+            id: getTrad("Settings.variations.modal.variations.slug"),
+            defaultMessage: "Variation slug",
           })}
           hint={formatMessage({
-            id: getTrad("Settings.variations.modal.variations.namme.description"),
-            defaultMessage:
-              "Variation will be displayed under that name in the administration panel",
+            id: getTrad(
+              "Settings.variations.modal.variations.slug.description"
+            ),
+            defaultMessage: "Internal name of the variation",
           })}
           error={
             errors.namme
               ? formatMessage({
-                  id: getTrad("Settings.variations.modal.variations.namme.error"),
+                  id: getTrad(
+                    "Settings.variations.modal.variations.slug.error"
+                  ),
                   defaultMessage:
-                    "The variation display name can only be less than 50 characters.",
+                    "The variation slug can only be less than 50 characters.",
                 })
               : undefined
           }

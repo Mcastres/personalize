@@ -25,17 +25,21 @@ const paramsContain = (key, params) => {
  * @param {object} ctx
  */
 const wrapParams = async (params = {}, ctx = {}) => {
-  const { action } = ctx;
+  const { action } = ctx; 
+
+  const modelDef = strapi.getModel(ctx.uid);
+
+  // Check if the model is localized
+  const isLocalizedContentType = strapi
+    .plugin("i18n")
+    ?.service("content-types")
+    .isLocalizedContentType(modelDef);
 
   // Get default locale
-  const getDefaultLocale = strapi
+  const defaultLocale = await strapi
     .plugin("i18n")
-    ?.service("locales").getDefaultLocale;
-
-  let defaultLocale = null;
-  if (getDefaultLocale) {
-    defaultLocale = await getDefaultLocale();
-  }
+    ?.service("locales")
+    .getDefaultLocale();
 
   let filters = [{ variation: params[VARIATION_QUERY_FILTER] }];
 
@@ -44,13 +48,14 @@ const wrapParams = async (params = {}, ctx = {}) => {
     // variation=all
     if (params[VARIATION_QUERY_FILTER] === "all") {
       // variation=all&locale=...
-      if (has(LOCALE_QUERY_FILTER, params)) {
+      if (has(LOCALE_QUERY_FILTER, params) && isLocalizedContentType) {
         // variation=all&locale=all
         if (params[LOCALE_QUERY_FILTER] === "all") {
           return {
             ...omit([LOCALE_QUERY_FILTER, VARIATION_QUERY_FILTER], params),
           };
         }
+        // variation=all&locale=...
         return {
           ...omit([VARIATION_QUERY_FILTER, LOCALE_QUERY_FILTER], params),
           filters: {
@@ -59,8 +64,7 @@ const wrapParams = async (params = {}, ctx = {}) => {
             ),
           },
         };
-      }
-      else if (defaultLocale) {
+      } else if (defaultLocale && isLocalizedContentType) {
         return {
           ...omit(VARIATION_QUERY_FILTER, params),
           filters: {
@@ -72,25 +76,14 @@ const wrapParams = async (params = {}, ctx = {}) => {
     }
 
     // If locale is also in params
-    if (has(LOCALE_QUERY_FILTER, params)) {
+    if (has(LOCALE_QUERY_FILTER, params) && isLocalizedContentType) {
       // locale=all
       if (params[LOCALE_QUERY_FILTER] === "all") {
         // locale=all&variation=...
-        if (has(VARIATION_QUERY_FILTER, params)) {
-          return {
-            ...omit([LOCALE_QUERY_FILTER, VARIATION_QUERY_FILTER], params),
-            filters: {
-              $and: [{ variation: params[VARIATION_QUERY_FILTER] }].concat(
-                params.filters || []
-              ),
-            },
-          };
-        }
-        // locale=all
         return {
-          ...omit(LOCALE_QUERY_FILTER, params),
+          ...omit([LOCALE_QUERY_FILTER, VARIATION_QUERY_FILTER], params),
           filters: {
-            $and: [{ variation: await getDefaultVariation() }].concat(
+            $and: [{ variation: params[VARIATION_QUERY_FILTER] }].concat(
               params.filters || []
             ),
           },
@@ -111,16 +104,18 @@ const wrapParams = async (params = {}, ctx = {}) => {
       };
     }
 
-    // variation=... with default locale
-    return {
-      ...omit(VARIATION_QUERY_FILTER, params),
-      filters: {
-        $and: [
-          { variation: params[VARIATION_QUERY_FILTER] },
-          { locale: defaultLocale },
-        ].concat(params.filters || []),
-      },
-    };
+    if (isLocalizedContentType) {
+      // variation=... with default locale
+      return {
+        ...omit(VARIATION_QUERY_FILTER, params),
+        filters: {
+          $and: [
+            { variation: params[VARIATION_QUERY_FILTER] },
+            { locale: defaultLocale },
+          ].concat(params.filters || []),
+        },
+      };
+    }
   }
 
   const entityDefinedById =
@@ -134,7 +129,7 @@ const wrapParams = async (params = {}, ctx = {}) => {
 
   const { getDefaultVariation } = getService("variations");
 
-  if (has(LOCALE_QUERY_FILTER, params)) {
+  if (has(LOCALE_QUERY_FILTER, params) && isLocalizedContentType) {
     return {
       ...params,
       filters: {
@@ -148,12 +143,9 @@ const wrapParams = async (params = {}, ctx = {}) => {
     return {
       ...params,
       filters: {
-        $and: [
-          { variation: await getDefaultVariation() },
-          {
-            locale: defaultLocale,
-          },
-        ].concat(params.filters || []),
+        $and: [{ variation: await getDefaultVariation() }].concat(
+          params.filters || []
+        ),
       },
     };
   }

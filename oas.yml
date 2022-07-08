@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  title: Strapi i18n Plugin
+  title: Strapi personalization Plugin
   version: 1.0.0
 servers:
   - url: http://localhost:1337
@@ -9,72 +9,58 @@ externalDocs:
   url: https://docs.strapi.io
   description: Strapi documentation
 paths:
-  /i18n/iso-locales:
-    get:
-      tags:
-        - ISO-locales
-      description: List iso-locales that the app can use
-      responses:
-        200:
-          description: The list of the locales the app can use
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/iso-locale'
-  /i18n/locales:
+  /personalization/variations:
     get:
       tags:
         - Locales
-      description: List locales used by the app
+      description: List variations used by the app
       responses:
         200:
-          description: A list of locales
+          description: A list of variations
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/locale'
+                  $ref: '#/components/schemas/variation'
     post:
       tags:
         - Locales
-      description: Create a locale
+      description: Create a variation
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/localeInputCreate'
+              $ref: '#/components/schemas/variationInputCreate'
       responses:
         200:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/locale'
-  /i18n/locales/{id}:
+                $ref: '#/components/schemas/variation'
+  /personalization/variations/{id}:
     put:
       tags:
         - Locales
-      description: Update the name of a locale
+      description: Update the name of a variation
       parameters:
-        - $ref: '#/components/parameters/locale-id'
+        - $ref: '#/components/parameters/variation-id'
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/localeInputUpdate'
+              $ref: '#/components/schemas/variationInputUpdate'
       responses:
         200:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/locale'
-  /i18n/content-manager/actions/get-non-localized-fields:
+                $ref: '#/components/schemas/variation'
+  /personalization/content-manager/actions/get-non-personalized-fields:
     post:
       tags:
         - Content-Manager
-      description: Return the non localized fields of a related entity in order to pre-fill the creation form of a related entity.
+      description: Return the non personalized fields of a related entity in order to pre-fill the creation form of a related entity.
       requestBody:
         content:
           application/json:
@@ -89,8 +75,8 @@ paths:
                 properties:
                   nonLocalizedFields:
                     type: object
-                  localizations:
-                    description: All related entities id and locale
+                  personalizations:
+                    description: All related entities id and variation
                     type: array
                     items:
                       type: object
@@ -98,9 +84,9 @@ paths:
                         id:
                           $ref: '#/components/schemas/id'
                           description: Id of this related entity
-                        locale:
+                        variation:
                           type: string
-                          description: Code of the locale of this related entity
+                          description: Code of the variation of this related entity
 
 components:
   schemas:
@@ -109,7 +95,7 @@ components:
         - type: string
         - type: integer
 
-    localeInputCreate:
+    variationInputCreate:
       type: object
       required:
         - code
@@ -117,30 +103,30 @@ components:
       properties:
         name:
           type: string
-          description: Name of the locale
+          description: Name of the variation
         code:
           type: string
-          description: ISO code of the locale
+          description: ISO code of the variation
         isDefault:
           type: boolean
-          description: Set default locale (ignored if set to false)
+          description: Set default variation (ignored if set to false)
 
-    localeInputUpdate:
+    variationInputUpdate:
       type: object
       properties:
         name:
           type: string
-          description: Name of the locale
+          description: Name of the variation
         isDefault:
           type: boolean
-          description: Set default locale (ignored if set to false)
+          description: Set default variation (ignored if set to false)
 
     getNonLocalizedFieldsInput:
       type: object
       required:
         - model
         - id
-        - locale
+        - variation
       properties:
         model:
           type: string
@@ -148,37 +134,37 @@ components:
         id:
           $ref: '#/components/schemas/id'
           description: Id of an entity related to the one that will be created
-        locale:
+        variation:
           type: string
-          description: The locale of the entity that will be pre-filled with the non localized fields this route returns
+          description: The variation of the entity that will be pre-filled with the non personalized fields this route returns
 
-    locale:
+    variation:
       type: object
       properties:
         id:
           $ref: '#/components/schemas/id'
         name:
           type: string
-          description: Name of the locale
+          description: Name of the variation
         code:
           type: string
-          description: ISO code of the locale
+          description: ISO code of the variation
         isDefault:
           type: boolean
-          description: Is the default locale
+          description: Is the default variation
 
-    iso-locale:
+    iso-variation:
       type: object
       properties:
         name:
           type: string
-          description: Name of the locale
+          description: Name of the variation
         code:
           type: string
-          description: ISO code of the locale
+          description: ISO code of the variation
 
   parameters:
-    locale-id:
+    variation-id:
       in: path
       name: id
       schema:

@@ -26,6 +26,7 @@ const validateVariationCreation = async (ctx, next) => {
   const locale = get("plugins.i18n.locale", query);
 
   const relatedEntityId = get("plugins.personalization.relatedEntityId", query);
+  
   // cleanup to avoid creating duplicates in singletypes
   ctx.request.query = {};
 
@@ -39,7 +40,7 @@ const validateVariationCreation = async (ctx, next) => {
 
   body.variation = entityVariation;
 
-  // If a variation exists
+  // If i18n is activated, we send the locale param
   if (locale) {
     body.locale = locale;
   }

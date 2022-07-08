@@ -18,7 +18,7 @@ const DeleteModalAdditionalInfos = () => {
         {
           id: getTrad('Settings.list.actions.deleteAdditionalInfos'),
           defaultMessage:
-            'This will delete the active variation versions <em>(from Internationalization)</em>',
+            'This will delete the active variation versions <em>(from Personalization)</em>',
         },
         {
           em: chunks => (

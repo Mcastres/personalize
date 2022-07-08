@@ -46,24 +46,23 @@ const BaseForm = () => {
         <TextInput
           name="slug"
           label={formatMessage({
-            id: getTrad("Settings.variations.modal.variations.displayName"),
-            defaultMessage: "Variation display name",
+            id: getTrad("Settings.variations.modal.variations.slug"),
+            defaultMessage: "Variation slug",
           })}
           hint={formatMessage({
             id: getTrad(
-              "Settings.variations.modal.variations.displayName.description"
+              "Settings.variations.modal.variations.slug.description"
             ),
-            defaultMessage:
-              "Variation will be displayed under that name in the administration panel",
+            defaultMessage: "Internal name of the variation",
           })}
           error={
-            errors.displayName
+            errors.slug
               ? formatMessage({
                   id: getTrad(
-                    "Settings.variations.modal.variations.displayName.error"
+                    "Settings.variations.modal.variations.slug.error"
                   ),
                   defaultMessage:
-                    "The variation display name can only be less than 50 characters.",
+                    "The variation slug can only be less than 50 characters.",
                 })
               : undefined
           }

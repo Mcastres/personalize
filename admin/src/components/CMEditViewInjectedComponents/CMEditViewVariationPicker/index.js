@@ -14,6 +14,8 @@ import { createVariationsOption } from "./utils";
 import CMEditViewCopyVariation from "../CMEditViewCopyVariation";
 import Bullet from "./Bullet";
 
+import { has } from "lodash"
+
 import useGetExistingVariation from "../../../hooks/useGetExistingVariation";
 
 const CMEditViewVariationPicker = ({
@@ -40,16 +42,9 @@ const CMEditViewVariationPicker = ({
   const { push } = useHistory();
 
   const handleChange = (useGetExistingVariation) => async (value) => {
-    console.log(value);
     if (value === currentVariation) {
       return;
     }
-
-    const data = await useGetExistingVariation(
-      slug,
-      query.plugins.i18n.locale,
-      query.plugins.personalization.variation
-    );
 
     const nextVariation = options.find((option) => {
       return option.value === value;
@@ -60,26 +55,50 @@ const CMEditViewVariationPicker = ({
     let defaultParams = {
       plugins: {
         ...query.plugins,
-        personalization: { variation: data?.results[0]?.variation },
-        i18n: { locale: data?.results[0]?.locale },
+        personalization: { ...query.plugins.personalization, variation: value },
       },
     };
 
-    if (data?.pagination) {
-      if (data?.results[0]?.localizations.length > 0) {
-        defaultParams.plugins.i18n.relatedEntityId = data?.results[0]?.id;
-      } else {
-        defaultParams.plugins.personalization.relatedEntityId =
-          data?.results[0]?.id;
-      }
-    }
-
     if (currentEntityId) {
       defaultParams.plugins.personalization.relatedEntityId = currentEntityId;
-      // delete defaultParams.plugins.i18n.relatedEntityId;
     }
 
-    console.log(defaultParams)
+    // If i18n is enabled
+    if (has(defaultParams.plugins, "i18n")) {
+      delete defaultParams.plugins.i18n.relatedEntityId;
+    }
+
+    if (
+      status !== "published" &&
+      status !== "draft" &&
+      has(defaultParams.plugins, "i18n")
+    ) {
+      const existingLocalizedVariation = await useGetExistingVariation(
+        slug,
+        defaultParams?.plugins.i18n.locale,
+        value
+      );
+
+      const { total } = existingLocalizedVariation?.pagination;
+      const entry = existingLocalizedVariation?.results[0];
+
+      if (total > 0) {
+        if (entry?.localizations.length > 0) {
+          defaultParams.plugins.i18n.relatedEntityId = entry.id;
+          delete defaultParams.plugins.personalization.relatedEntityId;
+        } else {
+          defaultParams.plugins.personalization.relatedEntityId = entry.id;
+          delete defaultParams.plugins.i18n.relatedEntityId;
+        }
+
+        push({
+          pathname: `/content-manager/collectionType/${slug}/${entry.id}`,
+          search: stringify(defaultParams, { encode: false }),
+        });
+
+        return;
+      }
+    }
 
     if (isSingleType) {
       setQuery(defaultParams);
@@ -107,10 +126,9 @@ const CMEditViewVariationPicker = ({
     personalizations
   ).filter(({ status, value }) => {
     if (status === "did-not-create-variation") {
-      const tmp = createPermissions.find(({ properties }) =>
+      return createPermissions.find(({ properties }) =>
         get(properties, "variations", []).includes(value)
       );
-      return tmp;
     }
 
     return readPermissions.find(({ properties }) =>
@@ -141,7 +159,7 @@ const CMEditViewVariationPicker = ({
       <Typography variant="sigma" textColor="neutral600">
         {formatMessage({
           id: getTrad("plugin.name"),
-          defaultMessage: "Internationalization",
+          defaultMessage: "Personalization",
         })}
       </Typography>
       <Box paddingTop={2} paddingBottom={6}>

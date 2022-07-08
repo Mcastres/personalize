@@ -32,7 +32,7 @@
     "npm": ">=6.0.0"
   },
   "strapi": {
-    "displayName": "Internationalization",
+    "displayName": "Personalization",
     "name": "personalization",
     "description": "This plugin enables to create, to read and to update content in different variations, both from the Admin Panel and from the API.",
     "required": false,

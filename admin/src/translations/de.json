@@ -53,7 +53,7 @@
   "components.Select.variations.not-available": "Keine Inhalte verfügbar",
   "plugin.description.long": "Dieses Plugin ermöglicht es, Inhalte in verschiedenen Sprachen zu erstellen, zu lesen und zu aktualisieren, sowohl über das Admin-Panel als auch über die API",
   "plugin.description.short": "Dieses Plugin ermöglicht es, Inhalte in verschiedenen Sprachen zu erstellen, zu lesen und zu aktualisieren, sowohl über das Admin-Panel als auch über die API",
-  "plugin.name": "Internationalisierung",
+  "plugin.name": "Personalisierung",
   "plugin.schema.personalization.ensure-unique-personalization": "Einzigartige Felder müssen lokalisiert sein",
   "plugin.schema.personalization.personalized.description": "Ermöglicht es Inhalte in verschiedenen Sprachen zu pflegen",
   "plugin.schema.personalization.personalized.description-content-type": "Ermöglicht es Inhalte in verschiedenen Sprachen zu pflegen",

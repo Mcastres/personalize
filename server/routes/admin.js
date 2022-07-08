@@ -5,20 +5,6 @@ module.exports = {
   routes: [
     {
       method: "GET",
-      path: "/iso-variations",
-      handler: "iso-variations.listIsoVariations",
-      config: {
-        policies: [
-          "admin::isAuthenticatedAdmin",
-          {
-            name: "plugin::content-manager.hasPermissions",
-            config: { actions: ["plugin::personalization.variation.read"] },
-          },
-        ],
-      },
-    },
-    {
-      method: "GET",
       path: "/variations",
       handler: "variations.listVariations",
       config: {

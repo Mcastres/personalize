@@ -3,6 +3,8 @@
 const { prop, propEq, identity, merge } = require('lodash/fp');
 const { ValidationError } = require('@strapi/utils').errors;
 
+const { getService } = require("./utils");
+
 const VARIATION_SCALAR_TYPENAME = 'PersonalizationVariationCode';
 const VARIATION_ARG_PLUGIN_NAME = 'PersonalizationVariationArg';
 
@@ -70,8 +72,9 @@ module.exports = ({ strapi }) => ({
       };
     });
 
-    const getVariationScalar = ({ nexus }) => {
-      const variations = getPersonalizationService('iso-variations').getIsoVariations();
+    const getVariationScalar = async ({ nexus }) => {
+      const variationsService = getService("variations");
+      const variations = await variationsService.find();
 
       return nexus.scalarType({
         name: VARIATION_SCALAR_TYPENAME,

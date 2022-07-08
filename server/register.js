@@ -22,17 +22,12 @@ const addContentManagerVariationMiddleware = (strapi) => {
   strapi.server.router.use(
     "/content-manager/collection-types/:model",
     (ctx, next) => {
-      const isVariationAction = _.has(
+      const isPersonalizationScope = _.has(
         ctx.request.query,
         "plugins.personalization.relatedEntityId"
       );
 
-      if (ctx.method === "POST" && isVariationAction) {
-        console.log(
-          "IN VARIATION MIDDLEWARE",
-          ctx.request.query,
-          isVariationAction
-        );
+      if (ctx.method === "POST" && isPersonalizationScope) {
         return validateVariationCreation(ctx, next);
       }
 
@@ -43,7 +38,7 @@ const addContentManagerVariationMiddleware = (strapi) => {
   strapi.server.router.use(
     "/content-manager/single-types/:model",
     (ctx, next) => {
-      if (ctx.method === "PUT" && isVariationAction) {
+      if (ctx.method === "PUT" && isPersonalizationScope) {
         return validateVariationCreation(ctx, next);
       }
 

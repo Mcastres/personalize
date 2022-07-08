@@ -5,7 +5,7 @@ const { getService } = require('../../utils');
 
 const actions = ['create', 'read', 'update', 'delete'].map(uid => ({
   section: 'settings',
-  category: 'Internationalization',
+  category: 'Personalization',
   subCategory: 'Variations',
   pluginName: 'personalization',
   displayName: capitalize(uid),
